@@ -12,6 +12,21 @@ void Header::setName(std::string fileName) {
     }
 }
 
+void Header::setMode(unsigned short mode) {
+    *(unsigned short*)this->mode = mode;
+}
+
+int Header::getMode() {
+    unsigned short mode = *(unsigned short*)(this->mode);
+    if(mode & S_IFDIR){
+        printf("is dir!\n");
+        return MODE_DIR;
+    }else if(mode & S_IFREG){
+        printf("is wenjian\n");
+        return MODE_REG;
+    }
+}
+
 std::string Header::getName() {
     if(*name_extra=='n'){
         return std::string(name);
@@ -23,11 +38,14 @@ std::string Header::getName() {
 }
 
 void Header::setFileInfo(std::string archivePath, std::string fileName){
-    struct stat buf;
+    struct stat buf; //获取文件信息
     if(stat((archivePath+fileName).c_str(), &buf)==-1){
         throw std::invalid_argument("file name error");
     }
     setName(fileName);
+
     struct tm *p = gmtime(&buf.st_atime);
     printf("%d %d %d", p->tm_year, p->tm_mon, p->tm_mday);
+
+    setMode(buf.st_mode);
 }

@@ -21,8 +21,8 @@ void testBlockReadWrite(){
 }
 void testHeader(){
     Header h1, h2;
-    h1.setFileInfo("D:/past/F/C++_file/tar_simu2/","wTest");
-    std::cout<<h1.getName()<<std::endl;
+    h1.setFileInfo("D:/past/F/C++_file/tar_simu2/","test.txt");
+    std::cout<<h1.getMode()<<std::endl;
     FILE  *fp2;
 
     fp2 = fopen("wTest", "w");
@@ -31,6 +31,6 @@ void testHeader(){
 
     fp2 = fopen("wTest","r");
     h2.read(fp2);
-    std::cout<<h2.getName()<<std::endl;
+    std::cout<<h2.getMode()<<std::endl;
     fclose(fp2);
 }
