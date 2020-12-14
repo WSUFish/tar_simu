@@ -27,6 +27,7 @@ class Header: public Block{
     void setFileInfo(std::string archivePath, std::string fileName);
     void setName(std::string fileName);
     void setMode(unsigned short mode);
+    void setSize(off_t file_size);
     std::string getName();
     int getMode();
 };
