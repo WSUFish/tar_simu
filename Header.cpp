@@ -24,6 +24,8 @@ int Header::getMode() {
     }else if(mode & S_IFREG){
         printf("is wenjian\n");
         return MODE_REG;
+    }else{
+        throw std::runtime_error("not expected file type!");
     }
 }
 
@@ -38,8 +40,8 @@ std::string Header::getName() {
 }
 
 void Header::setFileInfo(std::string archivePath, std::string fileName){
-    struct stat buf; //获取文件信息
-    if(stat((archivePath+fileName).c_str(), &buf)==-1){
+    struct stat64 buf; //获取文件信息
+    if(stat64((archivePath+fileName).c_str(), &buf)==-1){
         throw std::invalid_argument("file name error");
     }
     setName(fileName);
@@ -48,4 +50,25 @@ void Header::setFileInfo(std::string archivePath, std::string fileName){
     printf("%d %d %d", p->tm_year, p->tm_mon, p->tm_mday);
 
     setMode(buf.st_mode);
+    setSize(buf.st_size);
+
+    
+    std::cout << fileName <<","<< buf.st_mode << "," << buf.st_size << std::endl;
+}
+
+void Header::setSize(off64_t file_size){
+    memcpy(size, &file_size, 8);
+}
+
+int Header::getSize(){
+    return (int)*(off64_t *)size;
+}
+
+void writeExtraField(const std::string &key, const std::string &field){
+
+}
+
+std::string getExtraField(const std::string &key){
+
+    return std::string();
 }
