@@ -1,14 +1,14 @@
 #include <iostream>
 #include <cstdio>
-#include "Block.h"
-#include "Header.h"
+#include "Archive.h"
+using namespace std;
 void testBlockReadWrite();
 void testHeader();
+void testCreateNExtract();
 int main() {
-    // std::cout << sizeof(int) << std::endl;
-    // std::cout << sizeof(off64_t) << std::endl;
-    // std::cout << sizeof(short) << std::endl;
-    testHeader();
+
+    testCreateNExtract();
+    //testHeader();
     return 0;
 }
 void testBlockReadWrite(){
@@ -35,5 +35,13 @@ void testHeader(){
     h2.read(fp2);
     std::cout<<h2.getName()<<","<<h2.getMode()<<","<<h2.getSize()<<std::endl;
     fclose(fp2);
+}
 
+void testCreateNExtract(){
+    Archive a("D:\\past\\F\\C++_file\\tar_simu2\\");
+    vector<string> vector1;
+    vector1.emplace_back("test.txt");
+    vector1.emplace_back("wTest.txt");
+    a.create("D:\\filetest\\1\\archive2.tar", vector1);
+    a.extract("D:\\filetest\\2\\", "D:\\filetest\\1\\archive2.tar");
 }

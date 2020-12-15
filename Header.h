@@ -12,6 +12,7 @@
 #include <iostream>
 #define MODE_DIR 1
 #define MODE_REG 4
+#define MODE_ZERO 8
 class Header: public Block{
     public:
     char *name; //文件名（包括相对路径）   长度100
@@ -40,6 +41,7 @@ class Header: public Block{
     int getMode(); //判断文件类型
     void writeExtraField(const std::string &key, const std::string &field);
     std::string getExtraField(const std::string &key);
+    bool allZero();
 };
 
 #endif //TAR_SIMU_HEADER_H

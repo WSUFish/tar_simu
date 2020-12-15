@@ -3,7 +3,27 @@
 //
 
 #include "Archive.h"
+void Archive::create(const std::string &targetPath, std::vector<std::string> &fileNameVector) {
+    FILE *targetFP = fopen(targetPath.c_str(),"w");
+    if(targetFP == nullptr){
+        throw std::runtime_error("can't create file!");
+    }
+    for(auto iter = fileNameVector.begin();iter!=fileNameVector.end();iter++){
+        package((*iter), targetFP);
+    }
+    fclose(targetFP);
+}
 
+void Archive::extract(const std::string &targetPath, const std::string &packageName) {
+    FILE *packageFP = fopen(packageName.c_str(), "r");
+    if(packageFP == nullptr){
+        throw std::runtime_error("can't find package!");
+    }
+    while(feof(packageFP)==0 && zeroBlockNum<2){
+        unpack(packageFP, targetPath);
+    }
+    fclose(packageFP);
+}
 void Archive::package(const std::string &fileName, FILE *targetFP) {
     Header h;
     h.setFileInfo(archivePath, fileName);
@@ -15,16 +35,13 @@ void Archive::package(const std::string &fileName, FILE *targetFP) {
                 throw std::runtime_error("file not exist!");
             }
             h.write(targetFP);
-            int fileSize = h.getSize();
-            while(fileSize > 0){
-                Block b;
-                b.read(fp);
-                b.write(targetFP);
-                fileSize -= 512;
-            }
+            readNwrite(fp, targetFP, h.getSize());
+            fclose(fp);
             break;
         case MODE_DIR:
             break;
+        default:
+            throw std::runtime_error("package:"+ fileName + " not expected file type!");
     }
 }
 
@@ -38,6 +55,28 @@ void Archive::unpack(FILE *packetFP, const std::string &path){
             if(fp==nullptr){
                 throw std::runtime_error("can't create file!");
             }
-            int fileSize
+            readNwrite(packetFP, fp, h.getSize());
+            fclose(fp);
+            break;
+        case MODE_DIR:
+            break;
+        case MODE_ZERO:
+            if(feof(packetFP)){ //C (!0) == true
+                return;
+            }
+            zeroBlockNum++;
+            break;
+        default:
+
+            throw std::runtime_error("unpack not expected file type!");
+    }
+}
+
+void Archive::readNwrite(FILE *readFP, FILE *writeFP, int fileSize) {
+    while(fileSize > 0){
+        Block b;
+        b.read(readFP);
+        b.write(writeFP);
+        fileSize -= 512;
     }
 }

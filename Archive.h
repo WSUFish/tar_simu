@@ -8,15 +8,18 @@
 class Archive {
 public:
     std::string archivePath; //archive原路径
-
-    Archive(std::string relativePath){
+    int zeroBlockNum;
+    Archive(const std::string &relativePath){
+        zeroBlockNum = 0;
         archivePath = relativePath;
     }
+    void create(const std::string &targetPath, std::vector<std::string> &fileNameVector);
+    void extract(const std::string &targetPath, const std::string &packageName);
     void package(const std::string &fileName, FILE *targetFP);
     void unpack(FILE *packetFP, const std::string &path);
     void writeHeader();
 private:
-    void readNwrite(FILE *readFP, FILE *writeFP, int size);
+    void readNwrite(FILE *readFP, FILE *writeFP, int fileSize);
 };
 
 
