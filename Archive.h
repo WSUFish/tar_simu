@@ -5,6 +5,9 @@
 #ifndef TAR_SIMU2_ARCHIVE_H
 #define TAR_SIMU2_ARCHIVE_H
 #include "Header.h"
+#include <filesystem> //C++17
+
+
 class Archive {
 public:
     std::string archivePath; //archive原路径
@@ -18,6 +21,8 @@ public:
     void package(const std::string &fileName, FILE *targetFP);
     void unpack(FILE *packetFP, const std::string &path);
     void writeHeader();
+    void iter_file();
+
 private:
     void readNwrite(FILE *readFP, FILE *writeFP, int fileSize);
 };

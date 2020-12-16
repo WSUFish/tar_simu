@@ -3,10 +3,12 @@
 //
 
 #include "Archive.h"
+namespace fs = std::filesystem;
+
 void Archive::create(const std::string &targetPath, std::vector<std::string> &fileNameVector) {
     FILE *targetFP = fopen(targetPath.c_str(),"w");
     if(targetFP == nullptr){
-        throw std::runtime_error("can't create file!");
+        throw std::runtime_error(targetPath+": can't create file!");
     }
     for(auto iter = fileNameVector.begin();iter!=fileNameVector.end();iter++){
         package((*iter), targetFP);
@@ -80,3 +82,10 @@ void Archive::readNwrite(FILE *readFP, FILE *writeFP, int fileSize) {
         fileSize -= 512;
     }
 }
+
+void Archive::iter_file(){
+        std::string path = "F:/vsc_ccpp/tar_simu";
+        for(const auto &entry: fs::directory_iterator(path)){
+            std::cout << entry.path() << std::endl;
+        }
+    }

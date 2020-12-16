@@ -5,9 +5,11 @@ using namespace std;
 void testBlockReadWrite();
 void testHeader();
 void testCreateNExtract();
+void testCreateNExtract2();
+void testFileIter();
 int main() {
-
-    testCreateNExtract();
+    testFileIter();
+    //testCreateNExtract2();
     //testHeader();
     return 0;
 }
@@ -44,4 +46,16 @@ void testCreateNExtract(){
     vector1.emplace_back("wTest.txt");
     a.create("D:\\filetest\\1\\archive2.tar", vector1);
     a.extract("D:\\filetest\\2\\", "D:\\filetest\\1\\archive2.tar");
+}
+void testCreateNExtract2(){
+    Archive a("F:\\vsc_ccpp\\tar_simu\\");
+    vector<string> vector1;
+    vector1.emplace_back("test.txt");
+    vector1.emplace_back("wTest.txt");
+    a.create("F:\\test\\1\\archive2.tar", vector1);
+    a.extract("F:\\test\\2\\", "F:\\test\\1\\archive2.tar");
+}
+void testFileIter(){
+    Archive a("F:\\vsc_ccpp\\tar_simu\\");
+    a.iter_file();
 }
