@@ -3,7 +3,6 @@
 //
 
 #include "Archive.h"
-namespace fs = std::filesystem;
 
 void Archive::create(const std::string &targetPath, std::vector<std::string> &fileNameVector) {
     FILE *targetFP = fopen(targetPath.c_str(),"w");
@@ -41,6 +40,10 @@ void Archive::package(const std::string &fileName, FILE *targetFP) {
             fclose(fp);
             break;
         case MODE_DIR:
+            h.write(targetFP);
+            for(const auto &entry: fs::directory_iterator(fileName)){
+                package(entry.path().string(), targetFP);
+            }
             break;
         default:
             throw std::runtime_error("package:"+ fileName + " not expected file type!");
@@ -55,12 +58,13 @@ void Archive::unpack(FILE *packetFP, const std::string &path){
             FILE *fp;
             fp = fopen((path + h.getName()).c_str(), "w");
             if(fp==nullptr){
-                throw std::runtime_error("can't create file!");
+                throw std::runtime_error(path + h.getName()+": can't create file!");
             }
             readNwrite(packetFP, fp, h.getSize());
             fclose(fp);
             break;
         case MODE_DIR:
+            fs::create_directory(path+h.getName());
             break;
         case MODE_ZERO:
             if(feof(packetFP)){ //C (!0) == true
@@ -84,8 +88,8 @@ void Archive::readNwrite(FILE *readFP, FILE *writeFP, int fileSize) {
 }
 
 void Archive::iter_file(){
-        std::string path = "F:/vsc_ccpp/tar_simu";
-        for(const auto &entry: fs::directory_iterator(path)){
-            std::cout << entry.path() << std::endl;
-        }
+    std::string path = "F:/vsc_ccpp/tar_simu";
+    for(const auto &entry: fs::directory_iterator(path)){
+        std::cout << entry.path() << std::endl;
     }
+}

@@ -42,9 +42,17 @@ std::string Header::getName() {
 }
 
 void Header::setFileInfo(std::string archivePath, std::string fileName){
+    fs::file_status s = fs::symlink_status(archivePath + fileName);
+    if(fs::is_directory(s)){
+        std::cout << fileName << " is directory" << std::endl;
+    }else if(fs::is_symlink(s)){
+        std::cout << fileName << " is a symlink!!!!!!!!" << std::endl;
+    }else if(fs::is_regular_file(s)){
+        std::cout << fileName << " is a file?" << std::endl;
+    }
     struct stat64 buf; //获取文件信息
     if(stat64((archivePath+fileName).c_str(), &buf)==-1){
-        throw std::invalid_argument("file name error"+archivePath+fileName);
+        throw std::invalid_argument("file name error: "+archivePath+fileName);
     }
     setName(fileName);
 

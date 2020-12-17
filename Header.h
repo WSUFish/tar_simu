@@ -10,6 +10,9 @@
 #include <vector>
 #include <map>
 #include <iostream>
+#include <filesystem> //C++17
+namespace fs = std::filesystem;
+
 #define MODE_DIR 1
 #define MODE_REG 4
 #define MODE_ZERO 8

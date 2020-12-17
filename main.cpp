@@ -8,8 +8,9 @@ void testCreateNExtract();
 void testCreateNExtract2();
 void testFileIter();
 int main() {
-    testFileIter();
-    //testCreateNExtract2();
+    //fs::create_symlink("F:/vsc_ccpp/tar_simu/symLinkTest.txt", "F:/vsc_ccpp/tar_simu/directoryTest/symLinkByFs");
+    //testFileIter();
+    testCreateNExtract2();
     //testHeader();
     return 0;
 }
@@ -52,6 +53,7 @@ void testCreateNExtract2(){
     vector<string> vector1;
     vector1.emplace_back("test.txt");
     vector1.emplace_back("wTest.txt");
+    vector1.emplace_back("directoryTest");
     a.create("F:\\test\\1\\archive2.tar", vector1);
     a.extract("F:\\test\\2\\", "F:\\test\\1\\archive2.tar");
 }
