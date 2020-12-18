@@ -41,8 +41,9 @@ void Archive::package(const std::string &fileName, FILE *targetFP) {
             break;
         case MODE_DIR:
             h.write(targetFP);
-            for(const auto &entry: fs::directory_iterator(fileName)){
-                package(entry.path().string(), targetFP);
+            for(const auto &entry: fs::directory_iterator(archivePath+fileName)){
+                std::cout<<"relative path: "<<fs::relative(entry.path(), archivePath)<<std::endl;
+                package(fs::relative(entry.path(), archivePath).string(), targetFP);
             }
             break;
         default:

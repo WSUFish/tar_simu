@@ -42,9 +42,10 @@ class Header: public Block{
     int getSize();
     std::string getName();
     int getMode(); //判断文件类型
-    void writeExtraField(const std::string &key, const std::string &field);
-    std::string getExtraField(const std::string &key);
+    std::string getExtraField(const std::string &key, int size);
     bool allZero();
+    void writeExtraBlock(const std::string &key, const std::string &field);
+    static std::string connectBlock(const std::vector<Block> &bv, int size);
 };
 
 #endif //TAR_SIMU_HEADER_H

@@ -13,8 +13,10 @@ class Block {
 public:
     char *block;
     Block();
+    Block(const Block &block1);
     ~Block();
     int read(FILE *fileName);
+    int read(const char *source, int size);
     int write(FILE *fileName);
 };
 
