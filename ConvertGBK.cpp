@@ -5,7 +5,9 @@
 void testConvert(const std::string &s){
     std::cout<<"s = "<<s<<"\n"
             <<"s->utf8->gbk = "<<Utf8ToGbk(GbkToUtf8(s))<<"\n"
+            <<"s->gbk->utf8 = "<<GbkToUtf8(Utf8ToGbk(s))<<"\n"
             <<"s->wstring->gbk = "<<WStringToGbk(GbkToWString(s))<<"\n"
+            //<<"s->wstring->utf8 = "<<WStringToGbk(GbkToWString(s))<<"\n"
             <<std::endl;
 }
 
@@ -40,6 +42,23 @@ std::string WStringToGbk(const wchar_t *wstr){
     return sTemp;
 }
 
+std::wstring Utf8ToWString(const char *src_str){
+    int len = MultiByteToWideChar(CP_UTF8, 0, src_str, -1, nullptr, 0);
+    auto* wstr = new wchar_t[len + 1]();
+    MultiByteToWideChar(CP_UTF8, 0, src_str, -1, wstr, len);
+    std::wstring wTemp = wstr;
+    delete[] wstr;
+    return wTemp;
+}
+std::string WStringToUtf8(const wchar_t *wstr){
+    int len = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, nullptr, 0, nullptr, nullptr);
+    auto* str = new char[len+1]();
+    WideCharToMultiByte(CP_UTF8, 0, wstr, -1, str, len, nullptr, nullptr);
+    std::string sTemp = str;
+    delete[] str;
+    return sTemp;
+}
+
 std::string Utf8ToGbk(const char *src_str)
 {
     int len = MultiByteToWideChar(CP_UTF8, 0, src_str, -1, nullptr, 0);
@@ -62,6 +81,12 @@ std::wstring GbkToWString(const std::string &src_str){
 }
 std::string WStringToGbk(const std::wstring &wstr){
     return WStringToGbk(wstr.c_str());
+}
+std::wstring Utf8ToWString(const std::string &src_str){
+    return Utf8ToWString(src_str.c_str());
+}
+std::string WStringToUtf8(const std::wstring &wstr){
+    return WStringToUtf8(wstr.c_str());
 }
 std::string Utf8ToGbk(const std::string &src_str){
     return Utf8ToGbk(src_str.c_str());

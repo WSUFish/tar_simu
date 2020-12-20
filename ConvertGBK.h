@@ -12,11 +12,15 @@ std::string GbkToUtf8(const char *src_str);
 std::wstring GbkToWString(const char *src_str);
 std::string WStringToGbk(const wchar_t *wstr);
 std::string Utf8ToGbk(const char *src_str);
+std::wstring Utf8ToWString(const char *src_str);
+std::string WStringToUtf8(const wchar_t *wstr);
 
 std::string GbkToUtf8(const std::string &src);
 std::wstring GbkToWString(const std::string &src_str);
 std::string WStringToGbk(const std::wstring &wstr);
 std::string Utf8ToGbk(const std::string &src_str);
+std::wstring Utf8ToWString(const std::string &src_str);
+std::string WStringToUtf8(const std::wstring &wstr);
 
 void testConvert(const std::string &s);
 

@@ -1,6 +1,15 @@
 #include <stdexcept>
 #include "Header.h"
 
+std::wstring Header::StringToWString(const std::string& str) {
+    int num = MultiByteToWideChar(0, 0, str.c_str(), -1, NULL, 0);
+    wchar_t *wide = new wchar_t[num];
+    MultiByteToWideChar(0, 0, str.c_str(), -1, wide, num);
+    std::wstring w_str(wide);
+    delete[] wide;
+    return w_str;
+}
+
 void Header::setName(std::string fileName) {
     //set name
     if(fileName.length()<=99){
@@ -9,10 +18,12 @@ void Header::setName(std::string fileName) {
     }else{
         strcpy(name, std::to_string(fileName.length()).c_str());
         *name_extra='y';
+        setExtraField("name", fileName);
+        //printf("too long~~~~~~~~\n");
     }
 }
 
-void Header::writeExtraBlock(const std::string &key, const std::string &field) {
+void Header::setExtraField(const std::string &key, const std::string &field) {
     std::vector<Block> v;
     int l =field.length();
     const char *source = field.c_str();
@@ -35,18 +46,26 @@ void Header::setMode(unsigned short mode) {
     *(unsigned short*)this->mode = mode;
 }
 
-int Header::getMode() {
-    unsigned short mode = *(unsigned short*)(this->mode);
-    if(mode & S_IFDIR){
-        printf("is dir!\n");
-        return MODE_DIR;
-    }else if(mode & S_IFREG){
-        printf("is wenjian\n");
-        return MODE_REG;
-    }else if(allZero()){
-        return MODE_ZERO;
-    }else{
+char Header::getMode() {
+    // unsigned short mode = *(unsigned short*)(this->mode);
+    // if(mode & S_IFDIR){
+    //     //printf("is dir!\n");
+    //     return MODE_DIR;
+    // }else if(mode & S_IFREG){
+    //     //printf("is wenjian\n");
+    //     return MODE_REG;
+    // }else if(allZero()){
+    //     return MODE_ZERO;
+    // }else{
+    //     throw std::runtime_error("not expected file type!");
+    // }
+    if(*mode == '\0'){
+        if(allZero()){
+            return MODE_ZERO;
+        }
         throw std::runtime_error("not expected file type!");
+    }else{
+        return *mode;
     }
 }
 
@@ -54,49 +73,50 @@ std::string Header::getName() {
     if(*name_extra=='n'){
         return std::string(name);
     }else if(*name_extra=='y'){
-        return std::string(name);
+        return getExtraField("name", atoi(name));
     }else{
         throw std::runtime_error("name_extra wrong");
     }
 }
 
 void Header::setFileInfo(std::string archivePath, std::string fileName){
-//    fs::file_status s1 = fs::symlink_status(archivePath + fileName);
-//    if(fs::is_directory(s1)){
-//        std::cout << fileName << " is directory" << std::endl;
-//    }else if(fs::is_symlink(s1)){
-//        std::cout << fileName << " is a symlink!!!!!!!!" << std::endl;
-//    }else if(fs::is_regular_file(s1)){
-//        std::cout << fileName << " is a file?" << std::endl;
-//    }
-//    fs::file_status s2 = fs::status(archivePath + fileName);
-//    if(fs::is_directory(s2)){
-//        std::cout << fileName << " is directory" << std::endl;
-//    }else if(fs::is_symlink(s2)){
-//        std::cout << fileName << " is a symlink!!!!!!!!" << std::endl;
-//    }else if(fs::is_regular_file(s2)){
-//        std::cout << archivePath+fileName << " is a file?" << std::endl;
-//    }
-//    if(fs::is_symlink(archivePath + fileName)){
-//        std::cout << archivePath+fileName << " is a symlink!!!!!!!!" << std::endl;
-//    }
-    struct stat64 buf; //获取文件信息
-    if(stat64((archivePath+fileName).c_str(), &buf)==-1){
-        throw std::invalid_argument("file name error: "+archivePath+fileName);
+    std::string filePath = archivePath + fileName;
+    //fs::path p = GbkToWString(filePath);
+    fs::path p = GbkToWString(filePath);
+    fs::file_status fss = fs::symlink_status(p);
+
+    if(!fs::exists(fss)){
+        testConvert(filePath);
+        std::cout << WStringToGbk(p.wstring()) << std::endl;
+        std::cout << filePath << std::endl;
+        throw std::invalid_argument("file name error: " + filePath);
     }
     setName(fileName);
+    setMode(fss);
+    if(getMode()!=MODE_REG){
+        setSize(0);
+    }else{
+        setSize(fs::file_size(p));
+    }
 
-    struct tm *p = gmtime(&buf.st_atime);
-    printf("%d %d %d", p->tm_year, p->tm_mon, p->tm_mday);
+    std::cout << getName() << " , " <<getMode()  << " , " << getSize() << std::endl;
 
-    setMode(buf.st_mode);
-    setSize(buf.st_size);
+    // struct stat64 buf; //获取文件信息
+    // if (stat64((archivePath + fileName).c_str(), &buf) == -1)
+    // {
+    //    throw std::invalid_argument("file name error: " + archivePath + fileName);
+    // }
+    // setName(fileName);
 
+
+
+    //struct tm *p = gmtime(&buf.st_atime);
     
-    std::cout << fileName <<","<< buf.st_mode << "," << buf.st_size << std::endl;
+    //printf("%d %d %d", p->tm_year, p->tm_mon, p->tm_mday);
+
 }
 
-void Header::setSize(off64_t file_size){
+void Header::setSize(uintmax_t file_size){
     memcpy(size, &file_size, 8);
 }
 
@@ -136,4 +156,52 @@ std::string Header::connectBlock(const std::vector<Block> &bv, int size) {
     }
     memcpy(temp, iter->block, size*sizeof(char));
     return std::string(buff);
+}
+
+int Header::read(FILE *fileName){
+    int result = Block::read(fileName);
+    readExtraField(fileName, "name", name, name_extra);
+    return result;
+}
+int Header::write(FILE *fileName){
+    int result = Block::write(fileName);
+    writeExtraField(fileName, "name", name_extra);
+    return result;
+}
+
+void Header::readExtraField(FILE *fileName, const std::string &key, char *field, char *field_extra){
+    int nameLength = 0;
+    if(*field_extra == 'y'){
+        std::vector<Block> v;
+        nameLength = atoi(field); 
+        while(nameLength > 0){
+            Block b;
+            b.read(fileName);
+            v.push_back(b);
+            nameLength -= 512;
+        }
+        extraField.insert(std::pair<std::string, std::vector<Block>>(key, v));
+    }
+}
+
+void Header::writeExtraField(FILE *fileName, const std::string &key, char *field_extra){
+    if(*field_extra=='y'){
+        auto v = extraField.find(key);
+        if(v!=extraField.end()){
+            for(auto &b: v->second){
+                b.write(fileName);
+            }
+        }
+    }
+}
+
+void Header::setMode(const fs::file_status &fss){
+    if(fs::is_directory(fss)){
+        *mode = MODE_DIR;
+    }else if(fs::is_symlink(fss)){
+        *mode = MODE_SYM;
+        std::cout << "识别为symlink了！！！！！！！！！！！！" << std::endl;
+    }else if(fs::is_regular_file(fss)){
+        *mode = MODE_REG;
+    }
 }

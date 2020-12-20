@@ -8,6 +8,16 @@ void testCreateNExtract(string rPath, string tPath);
 void testCreateNExtract2();
 void testFileIter();
 void testExtraField();
+
+void testExtraField2(){
+    Archive a("F:\\vsc_ccpp\\tar_simu\\testFile\\1\\");
+    vector<string> vector1;
+    vector1.emplace_back("directoryTest1");
+    vector1.emplace_back("directoryTest2");
+    vector1.emplace_back("multiFile.txt");
+    a.create("F:/vsc_ccpp/tar_simu/testFile/2/archive2.tar", vector1);
+    a.extract("F:/vsc_ccpp/tar_simu/testFile/2/", "F:/vsc_ccpp/tar_simu/testFile/2/archive2.tar");
+}
 int main() {
     //fs::create_symlink("D:\\past\\F\\C++_file\\tar_simu2\\testFile\\1\\wTest.txt", "D:\\past\\F\\C++_file\\tar_simu2\\testFile\\3\\stest");
     //testFileIter();
@@ -15,8 +25,15 @@ int main() {
     //testHeader();
     string rPath1 = "D:\\past\\F\\C++_file\\tar_simu2\\testFile\\1\\";
     string targetPath1 = "D:\\past\\F\\C++_file\\tar_simu2\\testFile\\2\\";
+    string rPath2 = "F:\\vsc_ccpp\\tar_simu\\testFile\\1\\";
+    string targetPath2 = "F:\\vsc_ccpp\\tar_simu\\testFile\\2\\";
     //testCreateNExtract(rPath1, targetPath1);
-    testExtraField();
+    //testCreateNExtract2();
+    
+    testExtraField2();
+    
+    //getchar();
+    //std::cout << sizeof(std::uintmax_t) << std::endl;
     return 0;
 }
 void testBlockReadWrite(){
@@ -67,7 +84,7 @@ void testFileIter(){
     Archive a("D:\\past\\F\\C++_file\\tar_simu2\\");
     a.iter_file();
 }
-void testExtraField(){
+void testExtraField1(){
     Header h;
     std::string s = "how long can the name be in windows?"
                     "kadhkehdkjehjjjjjjjjjjjjjjjjjjjjjjj]1"
@@ -87,6 +104,6 @@ void testExtraField(){
                     "888888888888888888888888888888888888888"
                     "99999999999999999999999999999999999"
                     "111111111111111111111111111111111111";
-    h.writeExtraBlock("name", s);
+    h.setExtraField("name", s);
     std::cout<<s.length()<<" : "<<h.getExtraField("name", s.length())<<std::endl;
 }
