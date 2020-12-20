@@ -9,14 +9,14 @@ void testCreateNExtract2();
 void testFileIter();
 void testExtraField();
 
-void testExtraField2(){
-    Archive a("F:\\vsc_ccpp\\tar_simu\\testFile\\1\\");
+void testExtraField2(const std::string &rPath, const std::string &tPath){
+    Archive a(rPath);
     vector<string> vector1;
-    vector1.emplace_back("directoryTest1");
-    vector1.emplace_back("directoryTest2");
-    vector1.emplace_back("multiFile.txt");
-    a.create("F:/vsc_ccpp/tar_simu/testFile/2/archive2.tar", vector1);
-    a.extract("F:/vsc_ccpp/tar_simu/testFile/2/", "F:/vsc_ccpp/tar_simu/testFile/2/archive2.tar");
+    vector1.emplace_back("directoryTest");
+    vector1.emplace_back("中文目录");
+    vector1.emplace_back("wTest.txt");
+    a.create(tPath+"archive2.tar", vector1);
+    a.extract(tPath, tPath+"archive2.tar");
 }
 int main() {
     //fs::create_symlink("D:\\past\\F\\C++_file\\tar_simu2\\testFile\\1\\wTest.txt", "D:\\past\\F\\C++_file\\tar_simu2\\testFile\\3\\stest");
@@ -30,10 +30,11 @@ int main() {
     //testCreateNExtract(rPath1, targetPath1);
     //testCreateNExtract2();
     
-    testExtraField2();
-    
+    //testExtraField2();
+    //testConvert("中文状况如何");
     //getchar();
     //std::cout << sizeof(std::uintmax_t) << std::endl;
+    testExtraField2(rPath1, targetPath1);
     return 0;
 }
 void testBlockReadWrite(){

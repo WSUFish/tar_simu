@@ -41,9 +41,9 @@ void Archive::package(const std::string &fileName, FILE *targetFP) {
             break;
         case MODE_DIR:
             h.write(targetFP);
-            for(const auto &entry: fs::directory_iterator(archivePath+fileName)){
+            for(const auto &entry: fs::directory_iterator(GbkToWString(archivePath+fileName))){
                 //std::cout<<"relative path: "<<fs::relative(entry.path(), archivePath)<<std::endl;
-                package(fs::relative(entry.path(), archivePath).string(), targetFP);
+                package(WStringToGbk(fs::relative(entry.path(), GbkToWString(archivePath)).wstring()), targetFP);
             }
             break;
         default:
@@ -65,7 +65,7 @@ void Archive::unpack(FILE *packetFP, const std::string &path){
             fclose(fp);
             break;
         case MODE_DIR:
-            fs::create_directory(path+h.getName());
+            fs::create_directory(GbkToWString(path+h.getName()));
             break;
         case MODE_ZERO:
             if(feof(packetFP)){ //C (!0) == true

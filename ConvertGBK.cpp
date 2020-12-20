@@ -4,6 +4,8 @@
 #include "ConvertGBK.h"
 void testConvert(const std::string &s){
     std::cout<<"s = "<<s<<"\n"
+            <<"s->utf8 = "<<GbkToUtf8(s)<<"\n"
+            <<"s->gbk = "<<Utf8ToGbk(s)<<"\n"
             <<"s->utf8->gbk = "<<Utf8ToGbk(GbkToUtf8(s))<<"\n"
             <<"s->gbk->utf8 = "<<GbkToUtf8(Utf8ToGbk(s))<<"\n"
             <<"s->wstring->gbk = "<<WStringToGbk(GbkToWString(s))<<"\n"
