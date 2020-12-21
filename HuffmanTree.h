@@ -6,6 +6,7 @@
 #define TAR_SIMU2_HUFFMANTREE_H
 #include <iostream>
 #include <queue>
+#include <map>
 class HuffmanNode{
 public:
     HuffmanNode *parent;
@@ -56,8 +57,13 @@ public:
     //优先队列，用于选出权值最小的节点
     HuffmanNode *rootP;
     std::priority_queue<HuffmanNode*, std::vector<HuffmanNode*>, p_greater<HuffmanNode>> hq;
-    std::vector<std::string> codeV;
+    //std::vector<std::string> codeV;
+    std::map<char, std::string> codeM;
+    HuffmanTree() = default;
     HuffmanTree(int charPower[], int charNum);
+    HuffmanTree(const std::map<char, int> &m);
+    void construct(int charPower[], int charNum);
+    void construct(const std::map<char, int> &m);
     void printTree() const;
     void printCodeV() const;
     void deleteNode(HuffmanNode *node);

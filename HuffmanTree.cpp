@@ -11,31 +11,12 @@ void testQueue(){
 }
 
 HuffmanTree::HuffmanTree(int charPower[], int charNum) {
-    //字符集不能小于1
-    if(charNum<1){
-        rootP = nullptr;
-        return;
-    }
-    //初始化优先队列和数组
-    codeV.resize(charNum);
-    for(int i=0;i<charNum;i++){
-        auto *t = new HuffmanNode((char)i, charPower[i]);
-        hq.push(t);
-    }
-    //循环生成
-    while(hq.size()>=2){
-        HuffmanNode *l = hq.top();
-        hq.pop();
-        HuffmanNode *r = hq.top();
-        hq.pop();
-        auto *temp = new HuffmanNode(l,r);
-        hq.push(temp);
-    }
-    //得到根节点
-    rootP = hq.top();
-    //构建编码表
-    constructCode(rootP,"");
+    construct(charPower, charNum);
 
+}
+
+HuffmanTree::HuffmanTree(const std::map<char, int> &m){
+    construct(m);
 }
 
 void HuffmanTree::printTree() const {
@@ -68,23 +49,81 @@ void HuffmanTree::deleteNode(HuffmanNode *node) {
     delete node;
 }
 
+
 void HuffmanTree::constructCode(HuffmanNode *node, const std::string &prefix) {
     if(node->isLeaf()){
         if(prefix.length()!=0){
-            codeV[(int)node->nodeChar] = prefix;
+            codeM[node->nodeChar] = prefix;
         }else{ //只有一种字符的特殊情况需要这样吗？
-            codeV[(int)node->nodeChar] = "0";
+            codeM[node->nodeChar] = prefix;
         }
     }else{
         constructCode(node->left, prefix+"0");
         constructCode(node->right, prefix+"1");
     }
 }
+
 void HuffmanTree::printCodeV() const {
-    for(auto i=0;i<codeV.size();i++){
-        std::cout<<i<<":"<<codeV[i]<<std::endl;
+    for(const auto &iter: codeM){
+        std::cout << (int)iter.first << ":" << iter.second << std::endl;
     }
 }
+
+void HuffmanTree::construct(int charPower[], int charNum){
+    //字符集不能小于1
+    if(charNum<1){
+        rootP = nullptr;
+        return;
+    }
+    //初始化优先队列
+    for(int i=0;i<charNum;i++){
+        if(charPower[i]==0){
+            continue;
+        }
+        auto *node = new HuffmanNode((char)i, charPower[i]);
+        hq.push(node);
+    }
+    //循环生成
+    while(hq.size()>=2){
+        HuffmanNode *l = hq.top();
+        hq.pop();
+        HuffmanNode *r = hq.top();
+        hq.pop();
+        auto *temp = new HuffmanNode(l,r);
+        hq.push(temp);
+    }
+    //得到根节点
+    rootP = hq.top();
+    //构建编码表
+    constructCode(rootP,"");
+
+}
+void HuffmanTree::construct(const std::map<char, int> &m){
+    if(m.size()<1){
+        rootP = nullptr;
+        std::cerr << "error! map too small" << std::endl;
+        return;
+    }
+    //初始化优先队列
+    for(const auto &iter : m){
+        auto *node = new HuffmanNode(iter.first, iter.second);
+        hq.push(node);
+    }
+    //循环生成
+    while(hq.size()>=2){
+        HuffmanNode *l = hq.top();
+        hq.pop();
+        HuffmanNode *r = hq.top();
+        hq.pop();
+        auto *temp = new HuffmanNode(l,r);
+        hq.push(temp);
+    }
+    //得到根节点
+    rootP = hq.top();
+    //构建编码表
+    constructCode(rootP,"");
+}
+
 
 HuffmanTree::~HuffmanTree() {
     deleteNode(rootP);

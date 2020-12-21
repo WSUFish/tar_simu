@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cstdio>
 #include "Archive.h"
-#include "HuffmanTree.h"
+#include "Compress.h"
 using namespace std;
 void testBlockReadWrite();
 void testHeader();
@@ -35,7 +35,10 @@ void testArchive(){
 }
 
 int main() {
-    testQueue();
+
+    std::bitset<8> bs1("00000000");
+    
+    std::cout << bs1 <<","<<sizeof(bs1) <<std::endl;
     return 0;
 }
 void testBlockReadWrite(){
