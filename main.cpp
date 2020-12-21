@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdio>
 #include "Archive.h"
+#include "HuffmanTree.h"
 using namespace std;
 void testBlockReadWrite();
 void testHeader();
@@ -18,23 +19,23 @@ void testExtraField2(const std::string &rPath, const std::string &tPath){
     a.create(tPath+"archive2.tar", vector1);
     a.extract(tPath, tPath+"archive2.tar");
 }
-int main() {
-    //fs::create_symlink("D:\\past\\F\\C++_file\\tar_simu2\\testFile\\1\\wTest.txt", "D:\\past\\F\\C++_file\\tar_simu2\\testFile\\3\\stest");
-    //testFileIter();
-    //testCreateNExtract2();
-    //testHeader();
+void testArchive(){
     string rPath1 = "D:\\past\\F\\C++_file\\tar_simu2\\testFile\\1\\";
     string targetPath1 = "D:\\past\\F\\C++_file\\tar_simu2\\testFile\\2\\";
     string rPath2 = "F:\\vsc_ccpp\\tar_simu\\testFile\\1\\";
     string targetPath2 = "F:\\vsc_ccpp\\tar_simu\\testFile\\2\\";
     //testCreateNExtract(rPath1, targetPath1);
     //testCreateNExtract2();
-    
+
     //testExtraField2();
     //testConvert("中文状况如何");
     //getchar();
     //std::cout << sizeof(std::uintmax_t) << std::endl;
     testExtraField2(rPath1, targetPath1);
+}
+
+int main() {
+    testQueue();
     return 0;
 }
 void testBlockReadWrite(){
