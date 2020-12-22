@@ -41,7 +41,7 @@ int main() {
     c.genCompressed("testFile/2/setting.py.hfz");
     c.printPower();
     Decompress d("testFile/2/setting.py.hfz");
-    d.decompress("testFile/2/setting.py");
+    d.decompress("testFile/2/setting.py.pdf");
     
     return 0;
 }

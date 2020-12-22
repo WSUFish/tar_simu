@@ -26,7 +26,9 @@ void Decompress::readHeader(std::ifstream &is) {
         charPower[(int)p.sourceCode] = p.power;
         
     }
+    std::cout << "bitSize = " << h.bitNum << std::endl;
     ht.construct(charPower, 256);
+    ht.printCodeV();
 }
 
 void Decompress::decompress(const std::string &targetFile) {
@@ -65,7 +67,7 @@ void Decompress::nextBit(std::ifstream &is) {
         buffP++;
         if( buffP-buff == BUFFSIZE){
             is.read(buff, sizeof(char) * BUFFSIZE);
-            
+            //std::cout << "next block" << std::endl;
             buffP = buff;
         }
     }

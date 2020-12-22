@@ -4,13 +4,18 @@
 
 
 void Compress::setPower(){
-    std::ifstream is(sourceFile);
+    std::ifstream is(sourceFile, std::ios::in|std::ios::binary);
     char tempC;
+
+    int bytesNum = 0;
+
     is.get(tempC);
     while(!is.eof()){
         charPower[(unsigned char)tempC]++;
         is.get(tempC);
+        bytesNum++;
     }
+    std::cout << bytesNum << " bytes!" << std::endl;
     ht.construct(charPower, 256);
     ht.printCodeV();
     is.close();
@@ -24,8 +29,11 @@ void Compress::writeHeader(std::ostream &os) {
         if(charPower[i]!=0){
             nonZero++;
             bitNum += charPower[i]*(int)(ht.codeM[(unsigned char)i].size());
+            std::cout << "bitNum = " << bitNum << std::endl;
         }
     }
+    std::cout << "bitSize = " << bitNum << std::endl;
+    std::cout << "noneZero = " << nonZero << std::endl;
     struct cHeader header = {nonZero,bitNum};
     os.write((char*)&header, sizeof(header));
     for(int i=0;i<256;i++){
@@ -45,10 +53,13 @@ void Compress::genCompressed(const std::string &targetFile){
 
     char tempC;
     is.get(tempC);
+    int bytesNum = 0;
     while(!is.eof()){
         writeCode(tempC, os);
         is.get(tempC);
+        bytesNum++;
     }
+    std::cout << bytesNum << " bytes!" << std::endl;
     //std::cout<<std::endl;
     os.write(buff, sizeof(char)*(buffP-buff+ ((bitInP==0)?0:1) ));
     is.close();
