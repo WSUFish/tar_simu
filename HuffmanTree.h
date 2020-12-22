@@ -7,6 +7,17 @@
 #include <iostream>
 #include <queue>
 #include <map>
+struct cHeader{
+    int powerPairNum;
+    int bitNum;
+};
+
+struct powerPair{
+    char sourceCode;
+    int power;
+};
+
+
 class HuffmanNode{
 public:
     HuffmanNode *parent;
@@ -56,10 +67,11 @@ class HuffmanTree {
 public:
     //优先队列，用于选出权值最小的节点
     HuffmanNode *rootP;
+    HuffmanNode *deP;
     std::priority_queue<HuffmanNode*, std::vector<HuffmanNode*>, p_greater<HuffmanNode>> hq;
     //std::vector<std::string> codeV;
     std::map<char, std::string> codeM;
-    HuffmanTree() = default;
+    HuffmanTree(){rootP = nullptr;deP = nullptr; };
     HuffmanTree(int charPower[], int charNum);
     HuffmanTree(const std::map<char, int> &m);
     void construct(int charPower[], int charNum);
@@ -68,6 +80,7 @@ public:
     void printCodeV() const;
     void deleteNode(HuffmanNode *node);
     void constructCode(HuffmanNode *node, const std::string &prefix);
+    bool decode(bool bit, char &result);
     ~HuffmanTree();
 };
 void testQueue();

@@ -2,6 +2,7 @@
 #include <cstdio>
 #include "Archive.h"
 #include "Compress.h"
+#include "Decompress.h"
 using namespace std;
 void testBlockReadWrite();
 void testHeader();
@@ -35,10 +36,10 @@ void testArchive(){
 }
 
 int main() {
-
-    std::bitset<8> bs1("00000000");
-    
-    std::cout << bs1 <<","<<sizeof(bs1) <<std::endl;
+    Compress c("compressTest.txt");
+    c.genCompressed("compressed.hfz");
+    Decompress d("compressed.hfz");
+    d.decompress("decompressedTest.txt");
     return 0;
 }
 void testBlockReadWrite(){

@@ -11,12 +11,15 @@ void testQueue(){
 }
 
 HuffmanTree::HuffmanTree(int charPower[], int charNum) {
+    rootP = nullptr;
     construct(charPower, charNum);
-
+    deP = rootP;
 }
 
 HuffmanTree::HuffmanTree(const std::map<char, int> &m){
+    rootP = nullptr;
     construct(m);
+    deP = rootP;
 }
 
 void HuffmanTree::printTree() const {
@@ -63,6 +66,21 @@ void HuffmanTree::constructCode(HuffmanNode *node, const std::string &prefix) {
     }
 }
 
+bool HuffmanTree::decode(bool bit, char &result) {
+    if(bit){
+        deP = deP->right;
+    }else{
+        deP = deP->left;
+    }
+    if(deP->isLeaf()){
+        result = deP->nodeChar;
+        deP = rootP;
+        return true;
+    }else{
+        return false;
+    }
+}
+
 void HuffmanTree::printCodeV() const {
     for(const auto &iter: codeM){
         std::cout << (int)iter.first << ":" << iter.second << std::endl;
@@ -94,6 +112,7 @@ void HuffmanTree::construct(int charPower[], int charNum){
     }
     //得到根节点
     rootP = hq.top();
+    deP = rootP;
     //构建编码表
     constructCode(rootP,"");
 

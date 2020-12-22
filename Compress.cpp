@@ -1,5 +1,7 @@
 #include "Compress.h"
 
+#include <utility>
+
 
 void Compress::setPower(){
     std::ifstream is(sourceFile);
@@ -10,13 +12,34 @@ void Compress::setPower(){
         is.get(tempC);
     }
     ht.construct(charPower, 256);
-    //ht.printCodeV();
+    ht.printCodeV();
     is.close();
 }
 
+void Compress::writeHeader(std::ostream &os) {
+    int nonZero = 0;
+    int bitNum = 0;
+    for(int i=0;i<256;i++){
+        if(charPower[i]!=0){
+            nonZero++;
+            bitNum += charPower[i]*(int)ht.codeM[(char)i].size();
+        }
+    }
+    struct cHeader header = {nonZero,bitNum};
+    os.write((char*)&header, sizeof(header));
+    for(int i=0;i<256;i++){
+        if(charPower[i]!=0){
+            struct powerPair pair = {(char)i, charPower[i]};
+            os.write((char*)&pair, sizeof(pair));
+        }
+    }
+}
 void Compress::genCompressed(const std::string &targetFile){
+    setPower();
+
     std::ifstream is(sourceFile);
     std::ofstream os(targetFile, std::ios::out|std::ios::binary);
+    writeHeader(os);
 
     char tempC;
     is.get(tempC);
@@ -24,7 +47,10 @@ void Compress::genCompressed(const std::string &targetFile){
         writeCode(tempC, os);
         is.get(tempC);
     }
-    
+    std::cout<<std::endl;
+    os.write(buff, sizeof(char)*(buffP-buff+ ((bitInP==0)?0:1) ));
+    is.close();
+    os.close();
 }
 
 void Compress::writeCode(char c, std::ostream &os){
@@ -33,12 +59,14 @@ void Compress::writeCode(char c, std::ostream &os){
     for(auto bit: code){
         writeSingleBit(bit);
         nextBit(os);
+
+        std::cout<<bit;
     }
 
 }
 
 
-Compress::Compress(const std::string &filePath):ht(),sourceFile(filePath){
+Compress::Compress(std::string filePath):ht(),sourceFile(std::move(filePath)){
     buffSize = 0;
     bitInP = 0;
     buffP = buff;
@@ -78,6 +106,7 @@ void Compress::nextBit(std::ostream &os){
         buffP++;
         if( buffP-buff == BUFFSIZE){
             os.write(buff, sizeof(char) * BUFFSIZE);
+            std::cout<<"块已满，写下一块"<<std::endl;
             buffP = buff;
         }
     }
