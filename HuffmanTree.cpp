@@ -58,7 +58,7 @@ void HuffmanTree::constructCode(HuffmanNode *node, const std::string &prefix) {
         if(prefix.length()!=0){
             codeM[node->nodeChar] = prefix;
         }else{ //只有一种字符的特殊情况需要这样吗？
-            codeM[node->nodeChar] = prefix;
+            codeM[node->nodeChar] = "0";
         }
     }else{
         constructCode(node->left, prefix+"0");
@@ -82,9 +82,11 @@ bool HuffmanTree::decode(bool bit, char &result) {
 }
 
 void HuffmanTree::printCodeV() const {
+    
     for(const auto &iter: codeM){
-        std::cout << (int)iter.first << ":" << iter.second << std::endl;
+        std::cout <<(int)iter.first<<" : " << iter.second <<"." <<std::endl;
     }
+    
 }
 
 void HuffmanTree::construct(int charPower[], int charNum){
@@ -98,7 +100,7 @@ void HuffmanTree::construct(int charPower[], int charNum){
         if(charPower[i]==0){
             continue;
         }
-        auto *node = new HuffmanNode((char)i, charPower[i]);
+        auto *node = new HuffmanNode((unsigned char)i, charPower[i]);
         hq.push(node);
     }
     //循环生成

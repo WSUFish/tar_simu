@@ -18,20 +18,20 @@ Decompress::Decompress(std::string filePath) :ht(),sourceFile(std::move(filePath
 void Decompress::readHeader(std::ifstream &is) {
     struct cHeader h{};
     is.read((char*)&h, sizeof(h));
-    std::cout<<"header:"<<h.bitNum<<","<<h.powerPairNum<<std::endl;
+    
     bitSize = h.bitNum;
     for(int i = 0;i<h.powerPairNum;i++){
         struct powerPair p{};
         is.read((char*)&p, sizeof(p));
         charPower[(int)p.sourceCode] = p.power;
-        std::cout<<"pair:"<<(int)p.sourceCode<<","<<p.power<<std::endl;
+        
     }
     ht.construct(charPower, 256);
 }
 
 void Decompress::decompress(const std::string &targetFile) {
 
-    std::ifstream is(sourceFile);
+    std::ifstream is(sourceFile, std::ios::in|std::ios::binary);
     std::ofstream os(targetFile, std::ios::out|std::ios::binary);
     readHeader(is);
 
@@ -49,7 +49,7 @@ char Decompress::readCode(std::ifstream &is) {
         nextBit(is);
     }
     nextBit(is);
-    std::cout<<result;
+    //std::cout<<result;
     return result;
 }
 
@@ -65,7 +65,7 @@ void Decompress::nextBit(std::ifstream &is) {
         buffP++;
         if( buffP-buff == BUFFSIZE){
             is.read(buff, sizeof(char) * BUFFSIZE);
-            std::cout<<"\nbuff已满，读下一块"<<std::endl;
+            
             buffP = buff;
         }
     }

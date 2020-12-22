@@ -36,10 +36,13 @@ void testArchive(){
 }
 
 int main() {
-    Compress c("compressTest.txt");
-    c.genCompressed("compressed.hfz");
-    Decompress d("compressed.hfz");
-    d.decompress("decompressedTest.txt");
+    
+    Compress c("testFile/1/setting.py");
+    c.genCompressed("testFile/2/setting.py.hfz");
+    c.printPower();
+    Decompress d("testFile/2/setting.py.hfz");
+    d.decompress("testFile/2/setting.py");
+    
     return 0;
 }
 void testBlockReadWrite(){

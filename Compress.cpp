@@ -8,7 +8,7 @@ void Compress::setPower(){
     char tempC;
     is.get(tempC);
     while(!is.eof()){
-        charPower[int(tempC)]++;
+        charPower[(unsigned char)tempC]++;
         is.get(tempC);
     }
     ht.construct(charPower, 256);
@@ -17,27 +17,29 @@ void Compress::setPower(){
 }
 
 void Compress::writeHeader(std::ostream &os) {
+    
     int nonZero = 0;
     int bitNum = 0;
     for(int i=0;i<256;i++){
         if(charPower[i]!=0){
             nonZero++;
-            bitNum += charPower[i]*(int)ht.codeM[(char)i].size();
+            bitNum += charPower[i]*(int)(ht.codeM[(unsigned char)i].size());
         }
     }
     struct cHeader header = {nonZero,bitNum};
     os.write((char*)&header, sizeof(header));
     for(int i=0;i<256;i++){
         if(charPower[i]!=0){
-            struct powerPair pair = {(char)i, charPower[i]};
+            struct powerPair pair = {(unsigned char)i, charPower[i]};
             os.write((char*)&pair, sizeof(pair));
         }
     }
+    
 }
 void Compress::genCompressed(const std::string &targetFile){
     setPower();
 
-    std::ifstream is(sourceFile);
+    std::ifstream is(sourceFile, std::ios::in|std::ios::binary);
     std::ofstream os(targetFile, std::ios::out|std::ios::binary);
     writeHeader(os);
 
@@ -47,20 +49,22 @@ void Compress::genCompressed(const std::string &targetFile){
         writeCode(tempC, os);
         is.get(tempC);
     }
-    std::cout<<std::endl;
+    //std::cout<<std::endl;
     os.write(buff, sizeof(char)*(buffP-buff+ ((bitInP==0)?0:1) ));
     is.close();
     os.close();
+    
 }
 
 void Compress::writeCode(char c, std::ostream &os){
-    std::string code = ht.codeM[c];
+    //std::cout << "write code" << std::endl;
+    std::string code = ht.codeM[(unsigned char)c];
 
     for(auto bit: code){
         writeSingleBit(bit);
         nextBit(os);
 
-        std::cout<<bit;
+        //std::cout<<bit;
     }
 
 }
@@ -106,7 +110,6 @@ void Compress::nextBit(std::ostream &os){
         buffP++;
         if( buffP-buff == BUFFSIZE){
             os.write(buff, sizeof(char) * BUFFSIZE);
-            std::cout<<"块已满，写下一块"<<std::endl;
             buffP = buff;
         }
     }

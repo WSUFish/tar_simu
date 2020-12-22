@@ -7,13 +7,14 @@
 #include <iostream>
 #include <queue>
 #include <map>
+//#include <uchar.h>
 struct cHeader{
     int powerPairNum;
     int bitNum;
 };
 
 struct powerPair{
-    char sourceCode;
+    unsigned char sourceCode;
     int power;
 };
 
@@ -23,7 +24,7 @@ public:
     HuffmanNode *parent;
     HuffmanNode *left;
     HuffmanNode *right;
-    char nodeChar;
+    unsigned char nodeChar;
     int power;
     HuffmanNode(){
         parent = nullptr;
@@ -70,7 +71,7 @@ public:
     HuffmanNode *deP;
     std::priority_queue<HuffmanNode*, std::vector<HuffmanNode*>, p_greater<HuffmanNode>> hq;
     //std::vector<std::string> codeV;
-    std::map<char, std::string> codeM;
+    std::map<unsigned char, std::string> codeM;
     HuffmanTree(){rootP = nullptr;deP = nullptr; };
     HuffmanTree(int charPower[], int charNum);
     HuffmanTree(const std::map<char, int> &m);
