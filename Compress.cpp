@@ -11,6 +11,7 @@ void Compress::setPower(){
 
     is.get(tempC);
     while(!is.eof()){
+
         charPower[(unsigned char)tempC]++;
         is.get(tempC);
         bytesNum++;
@@ -29,7 +30,7 @@ void Compress::writeHeader(std::ostream &os) {
         if(charPower[i]!=0){
             nonZero++;
             bitNum += charPower[i]*(int)(ht.codeM[(unsigned char)i].size());
-            std::cout << "bitNum = " << bitNum << std::endl;
+            //std::cout << "bitNum = " << bitNum << std::endl;
         }
     }
     std::cout << "bitSize = " << bitNum << std::endl;

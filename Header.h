@@ -1,8 +1,13 @@
 #ifndef TAR_SIMU_HEADER_H
 #define TAR_SIMU_HEADER_H
+#include "ConvertGBK.h"
 #include "Block.h"
+#include <QString>
+#include <QDir>
+#include <QFileInfo>
 #include <sys/stat.h>
-#include <unistd.h>
+#include <io.h>
+#include <process.h>
 #include <time.h>
 #include <string>
 #include <exception>
@@ -10,11 +15,9 @@
 #include <vector>
 #include <map>
 #include <iostream>
+#include <QDebug>
 #include <filesystem> //C++17
-#include <locale>
-#include <codecvt>
-#include <stringapiset.h>
-#include "ConvertGBK.h"
+
 
 namespace fs = std::filesystem;
 
@@ -42,10 +45,13 @@ class Header: public Block{
         check = size + 8;
     };
     void setFileInfo(std::string archivePath, std::string fileName);
+    void setFileInfoQt(const QString &archivePath, const QString &fileName);
+    //void setFileInfoQt(const QString &archivePath, const QString &fileName);
     void setName(std::string fileName);
     void setMode(unsigned short mode);
     void setMode(const fs::file_status &fss);
-    int getPerm(); //获取权限信息
+    void setMode(const QFileInfo &fi);
+//    int getPerm(); //获取权限信息
     void setSize(uintmax_t file_size);
     int getSize();
     std::string getName();
@@ -54,11 +60,16 @@ class Header: public Block{
     bool allZero();
     void setExtraField(const std::string &key, const std::string &field);
     static std::string connectBlock(const std::vector<Block> &bv, int size);
-    static std::wstring StringToWString(const std::string &str);
     int read(FILE *fileName);
     int write(FILE *fileName);
     void readExtraField(FILE *fileName, const std::string &key,char *field, char *field_extra);
     void writeExtraField(FILE *fileName, const std::string &key, char *field_extra);
+
+    void read(std::istream &is);
+    void write(std::ostream &os);
+    void readExtraField(std::istream &is, const std::string &key,char *field, char *field_extra);
+    void writeExtraField(std::ostream &os, const std::string &key, char *field_extra);
+    void printHead();
 };
 
 #endif //TAR_SIMU_HEADER_H

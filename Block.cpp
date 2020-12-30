@@ -14,12 +14,19 @@ Block::Block(const Block &block1) {
     block = new char[512]();
     memcpy(block, block1.block, 512*sizeof(char));
 }
-int Block::read(FILE *fileName) {
-    return fread(this->block, sizeof(char), 512, fileName);
+int Block::read(FILE *fileName, int size) {
+    return fread(this->block, sizeof(char), size, fileName);
 }
 
-int Block::write(FILE *fileName) {
-    return fwrite(block, sizeof(char), 512, fileName);
+int Block::write(FILE *fileName, int size) {
+    return fwrite(block, sizeof(char), size, fileName);
+}
+
+void Block::read(std::istream &is, int size){
+    is.read(block, sizeof(char)*size);
+}
+void Block::write(std::ostream &os, int size){
+    os.write(block, sizeof(char)*size);
 }
 
 int Block::read(const char *source, int size) {

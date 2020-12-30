@@ -1,14 +1,14 @@
-#include <stdexcept>
+//#include <stdexcept>
 #include "Header.h"
 
-std::wstring Header::StringToWString(const std::string& str) {
-    int num = MultiByteToWideChar(0, 0, str.c_str(), -1, NULL, 0);
-    wchar_t *wide = new wchar_t[num];
-    MultiByteToWideChar(0, 0, str.c_str(), -1, wide, num);
-    std::wstring w_str(wide);
-    delete[] wide;
-    return w_str;
-}
+//std::wstring Header::StringToWString(const std::string& str) {
+//    int num = MultiByteToWideChar(0, 0, str.c_str(), -1, NULL, 0);
+//    wchar_t *wide = new wchar_t[num];
+//    MultiByteToWideChar(0, 0, str.c_str(), -1, wide, num);
+//    std::wstring w_str(wide);
+//    delete[] wide;
+//    return w_str;
+//}
 
 void Header::setName(std::string fileName) {
     //set name
@@ -75,31 +75,36 @@ std::string Header::getName() {
     }else if(*name_extra=='y'){
         return getExtraField("name", atoi(name));
     }else{
-        throw std::runtime_error("name_extra wrong");
+        std::string s = name;
+        std::cout<<(int)*name_extra<<std::endl;
+        throw std::runtime_error(s+" name_extra wrong ");
     }
 }
 
 void Header::setFileInfo(std::string archivePath, std::string fileName){
     std::string filePath = archivePath + fileName;
+
+
+
     //fs::path p = GbkToWString(filePath);
-    fs::path p = GbkToWString(filePath);
-    fs::file_status fss = fs::symlink_status(p);
+//    fs::path p = GbkToWString(filePath);
+//    fs::file_status fss = fs::symlink_status(p);
 
-    if(!fs::exists(fss)){
-        testConvert(filePath);
-        std::cout << WStringToGbk(p.wstring()) << std::endl;
-        std::cout << filePath << std::endl;
-        throw std::invalid_argument("file name error: " + filePath);
-    }
-    setName(fileName);
-    setMode(fss);
-    if(getMode()!=MODE_REG){
-        setSize(0);
-    }else{
-        setSize(fs::file_size(p));
-    }
+//    if(!fs::exists(fss)){
+//        testConvert(filePath);
+//        std::cout << WStringToGbk(p.wstring()) << std::endl;
+//        std::cout << filePath << std::endl;
+//        throw std::invalid_argument("file name error: " + filePath);
+//    }
+//    setName(fileName);
+//    setMode(fss);
+//    if(getMode()!=MODE_REG){
+//        setSize(0);
+//    }else{
+//        setSize(fs::file_size(p));
+//    }
 
-    std::cout << getName() << " , " <<getMode()  << " , " << getSize() << std::endl;
+//    std::cout << getName() << " , " <<getMode()  << " , " << getSize() << std::endl;
 
     // struct stat64 buf; //获取文件信息
     // if (stat64((archivePath + fileName).c_str(), &buf) == -1)
@@ -114,6 +119,39 @@ void Header::setFileInfo(std::string archivePath, std::string fileName){
     
     //printf("%d %d %d", p->tm_year, p->tm_mon, p->tm_mday);
 
+}
+
+void Header::setFileInfoQt(const QString &archivePath, const QString &fileName){
+
+    QFileInfo fi(QDir(archivePath), fileName);
+
+    if(!fi.exists()){
+
+        std::cout<<Utf8ToGbk(fi.absoluteFilePath().toStdString())+ "not exit!"<<std::endl;
+        throw std::invalid_argument("file not found");
+    }
+    setName(fileName.toLocal8Bit().constData());
+    setMode(fi);
+    if(getMode()!=MODE_REG){
+        setSize(0);
+    }else{
+        setSize(fi.size());
+    }
+
+    printHead();
+
+}
+
+void Header::setMode(const QFileInfo &fi){
+    if(fi.isDir()){
+        *mode = MODE_DIR;
+    }else if(fi.isFile()){
+        *mode = MODE_REG;
+    }else if(fi.isSymLink()){
+        *mode = MODE_SYM;
+    }else{
+        std::cerr<<"error! unknown file type"<<std::endl;
+    }
 }
 
 void Header::setSize(uintmax_t file_size){
@@ -173,7 +211,7 @@ void Header::readExtraField(FILE *fileName, const std::string &key, char *field,
     int nameLength = 0;
     if(*field_extra == 'y'){
         std::vector<Block> v;
-        nameLength = atoi(field); 
+        nameLength = atoi(field);
         while(nameLength > 0){
             Block b;
             b.read(fileName);
@@ -203,5 +241,45 @@ void Header::setMode(const fs::file_status &fss){
         std::cout << "识别为symlink了！！！！！！！！！！！！" << std::endl;
     }else if(fs::is_regular_file(fss)){
         *mode = MODE_REG;
+    }
+}
+
+void Header::printHead(){
+    std::cout<<" name: " <<getName()<< '\n'
+             <<" mode: " <<getMode()<< '\n'
+             <<" size: " <<getSize()<< '\n'
+            <<std::endl;
+}
+
+void Header::read(std::istream &is){
+    Block::read(is);
+    readExtraField(is, "name", name, name_extra);
+}
+void Header::write(std::ostream &os){
+    Block::write(os);
+    writeExtraField(os, "name", name_extra);
+}
+void Header::readExtraField(std::istream &is, const std::string &key,char *field, char *field_extra){
+    int nameLength = 0;
+    if(*field_extra == 'y'){
+        std::vector<Block> v;
+        nameLength = atoi(field);
+        while(nameLength > 0){
+            Block b;
+            b.read(is);
+            v.push_back(b);
+            nameLength -= 512;
+        }
+        extraField.insert(std::pair<std::string, std::vector<Block>>(key, v));
+    }
+}
+void Header::writeExtraField(std::ostream &os, const std::string &key, char *field_extra){
+    if(*field_extra=='y'){
+        auto v = extraField.find(key);
+        if(v!=extraField.end()){
+            for(auto &b: v->second){
+                b.write(os);
+            }
+        }
     }
 }
