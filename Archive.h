@@ -18,9 +18,6 @@ public:
     }
     void create(const std::string &targetPath, std::vector<std::string> &fileNameVector);
     void extract(const std::string &targetPath, const std::string &packageName);
-    void package(const std::string &fileName, FILE *targetFP);
-    void package(const QString &fileName, FILE *targetFP);
-    void unpack(FILE *packetFP, const std::string &path);
 
     void package(const std::string &fileName, std::ostream &os);
     void package(const QString &fileName, std::ostream &os);
@@ -30,8 +27,6 @@ public:
     //void iter_file();
 
 private:
-    void packFrom(FILE *readFP, FILE *writeFP, int fileSize);
-    void unpackFrom(FILE *readFP, FILE *writeFP, int fileSize);
     void packFrom(std::istream &is, std::ostream &os, int fileSize);
     void unpackFrom(std::istream &is, std::ostream &os, int fileSize);
 };

@@ -19,7 +19,7 @@ void testArchive(){
     v.emplace_back("router.txt");
     v.emplace_back("2021年全国硕士研究生招生考试数学一试题及答案.pdf");
     ar.create("D:/filetest/2/testTar.tar",v);
-    ar.extract("D:/filetest/2/testTar","D:/filetest/2/testTar.tar");
+    ar.extract("D:/filetest/2/testTar/","D:/filetest/2/testTar.tar");
 }
 
 int main(int argc, char *argv[])
