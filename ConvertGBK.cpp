@@ -12,6 +12,14 @@ void testConvert(const std::string &s){
             //<<"s->wstring->utf8 = "<<WStringToGbk(GbkToWString(s))<<"\n"
             <<std::endl;
 }
+void testQ(const std::string &s)
+{
+    std::cout<<"s = "<<s<<"\n"
+            <<"s->Q->gbk = "<<QToGbk(GbkToQ(s))<<"\n"
+            <<std::endl;
+}
+
+
 
 std::string GbkToUtf8(const char *src_str)
 {
@@ -93,4 +101,22 @@ std::string WStringToUtf8(const std::wstring &wstr){
 std::string Utf8ToGbk(const std::string &src_str){
     return Utf8ToGbk(src_str.c_str());
 }
+
+
+QString GbkToQ(const std::string &src)
+{
+    return QString::fromLocal8Bit(src.c_str());
+}
+
+QString GbkToQ(const char *src)
+{
+    return QString::fromLocal8Bit(src);
+}
+
+
+std::string QToGbk(const QString &q)
+{
+    return q.toLocal8Bit().constData();
+}
+
 

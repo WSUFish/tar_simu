@@ -20,7 +20,7 @@ void Archive::extract(const std::string &targetPath, const std::string &packageN
 
     std::ifstream is(packageName, std::ios::binary|std::ios::in);
     if(!is){
-        throw std::runtime_error("无法打开 "+packageName);
+        throw std::runtime_error("无法打开备份文件 "+packageName);
     }
     while((!is.eof()) && zeroBlockNum<2){
         unpack(is, targetPath);
@@ -54,7 +54,7 @@ void Archive::package(const std::string &fileName, std::ostream &os) {
         case MODE_REG:{
             std::ifstream is(filePath, std::ios::binary|std::ios::in);
             if(!is){
-                throw std::runtime_error("无法打开 "+filePath);
+                throw std::runtime_error("无法打开原文件 "+filePath);
             }
             h.write(os);
             packFrom(is, os, h.getSize());
@@ -67,7 +67,7 @@ void Archive::package(const std::string &fileName, std::ostream &os) {
             QDir qd(hPath);
             qd.setFilter(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs );
             if(!qd.exists()){
-                throw std::runtime_error("找不到 "+filePath);
+                throw std::runtime_error("找不到目录 "+filePath);
             }
             for(auto &entry: qd.entryInfoList()){
                 QString ePath = entry.absoluteFilePath();
@@ -101,7 +101,7 @@ void Archive::unpack(std::istream &is, const std::string &path){
         case MODE_REG:{
             std::ofstream os(filePath, std::ios::binary | std::ios::out);
             if(!os){
-                throw std::runtime_error("无法创建 "+path + h.getName());
+                throw std::runtime_error("无法创建还原文件 "+path + h.getName());
             }
             unpackFrom(is, os, h.getSize());
             os.close();
@@ -110,7 +110,7 @@ void Archive::unpack(std::istream &is, const std::string &path){
         case MODE_DIR:{
             QDir cd(QString::fromLocal8Bit(path.c_str()));
             if(!cd.mkpath(QString::fromLocal8Bit(h.getName().c_str()))){
-                throw std::runtime_error("无法创建 "+path + h.getName());
+                throw std::runtime_error("无法创建还原目录 "+path + h.getName());
             }
             break;
         }

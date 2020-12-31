@@ -6,11 +6,11 @@
 #include "Archive.h"
 
 void testCompress(){
-    Compress c("D:/filetest/1/2021年全国硕士研究生招生考试数学一试题及答案.pdf");
-    c.genCompressed("D:/filetest/2/2021年全国硕士研究生招生考试数学一试题及答案.pdf.hfz");
+    Compress c("D:/filetest/2/testTar.tar");
+    c.genCompressed("D:/filetest/2/testTar.tar.hfz");
 
-    Decompress d("D:/filetest/2/2021年全国硕士研究生招生考试数学一试题及答案.pdf.hfz");
-    d.decompress("D:/filetest/2/2021年全国硕士研究生招生考试数学一试题及答案.pdf");
+    //Decompress d("D:/filetest/2/2021年全国硕士研究生招生考试数学一试题及答案.pdf.hfz");
+    //d.decompress("D:/filetest/2/2021年全国硕士研究生招生考试数学一试题及答案.pdf");
 }
 void testArchive(){
     Archive ar("D:/filetest/1/");
@@ -34,7 +34,10 @@ int main(int argc, char *argv[])
 {
 
     //testArchive();
+    //testCompress();
     //testDecompress();
+    //testQ("D:/filetest/2/testTar.tar");
+    //std::cout<<"stem="<<MainWindow::getStem("D:/filetest/2/testTar.tar.hfz").toStdString()<<std::endl;
     QApplication a(argc, argv);
     MainWindow w;
     w.show();

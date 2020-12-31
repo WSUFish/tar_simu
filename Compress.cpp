@@ -49,7 +49,13 @@ void Compress::genCompressed(const std::string &targetFile){
     setPower();
 
     std::ifstream is(sourceFile, std::ios::in|std::ios::binary);
+    if(!is){
+        throw std::runtime_error("无法打开原文件 "+sourceFile);
+    }
     std::ofstream os(targetFile, std::ios::out|std::ios::binary);
+    if(!os){
+        throw std::runtime_error("无法创建压缩文件 "+targetFile);
+    }
     writeHeader(os);
 
     char tempC;

@@ -34,7 +34,14 @@ void Decompress::readHeader(std::ifstream &is) {
 void Decompress::decompress(const std::string &targetFile) {
 
     std::ifstream is(sourceFile, std::ios::in|std::ios::binary);
+    if(!is){
+        throw std::runtime_error("无法打开压缩文件 "+sourceFile);
+    }
+
     std::ofstream os(targetFile, std::ios::out|std::ios::binary);
+    if(!os){
+        throw std::runtime_error("无法创建解压文件 "+targetFile);
+    }
     readHeader(is);
 
     is.read(buff, sizeof(char)*BUFFSIZE);

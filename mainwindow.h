@@ -22,6 +22,8 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    static QString getStem(const QString &filePath);//从绝对路径中取出去一次后缀文件名
+
 private slots:
     void on_okPushButton_clicked();
 

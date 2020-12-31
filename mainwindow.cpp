@@ -15,6 +15,12 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+QString MainWindow::getStem(const QString &filePath)
+{
+    QString fileName = filePath.section('/', -1, -1);
+    return fileName.section('.', 0, -2);
+}
+
 
 
 
@@ -40,8 +46,22 @@ void MainWindow::on_sourceToolButton_clicked()
 void MainWindow::on_uOkPushButton_clicked()
 {
     Archive a;
+    QString targetPath = ui->uTargetLineEdit->text();
+    QString packageName = ui->uSourceLineEdit->text();
+    std::string sPackage = QToGbk(packageName);
     try {
-        a.qExtract(ui->uTargetLineEdit->text(), ui->uSourceLineEdit->text());
+        if(packageName.endsWith(".tar.hfz")){
+            Decompress d(sPackage);
+            d.decompress(sPackage+".temp");
+            a.extract(QToGbk(targetPath) , sPackage+".temp");
+            QFile::remove(GbkToQ(sPackage+".temp"));
+        }else if(packageName.endsWith(".hfz")){
+            Decompress d(sPackage);
+            d.decompress(QToGbk(targetPath + getStem(packageName)));
+        }
+        else{
+            a.qExtract(targetPath, packageName);
+        }
         ui->uSourceLineEdit->clear();
         ui->uTargetLineEdit->clear();
         QMessageBox::information(this, QString::fromLocal8Bit("提醒"),QString::fromLocal8Bit("恢复成功"));
@@ -55,7 +75,7 @@ void MainWindow::on_uSourceToolButton_clicked()
 {
     QString curPath = QDir::rootPath();
     QString dlgTitle=QString::fromLocal8Bit("选择一个备份文件");
-    QString filter=QString::fromLocal8Bit("备份文件(*.tar);;压缩文件(*.hfz)");
+    QString filter=QString::fromLocal8Bit("备份文件(*.tar *.hfz)");
     QString filePath=QFileDialog::getOpenFileName(this,dlgTitle,curPath,filter);
     if(filePath.length()!=0){
         ui->uSourceLineEdit->setText(filePath);
