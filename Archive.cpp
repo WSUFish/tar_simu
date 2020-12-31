@@ -8,7 +8,7 @@ void Archive::create(const std::string &targetPath, std::vector<std::string> &fi
 
     std::ofstream os(targetPath, std::ios::binary|std::ios::out);
     if(!os){
-        throw std::runtime_error(targetPath+": can't create file!");
+        throw std::runtime_error("无法创建 "+targetPath);
     }
     for(auto iter = fileNameVector.begin();iter!=fileNameVector.end();iter++){
             package((*iter), os);
@@ -20,12 +20,19 @@ void Archive::extract(const std::string &targetPath, const std::string &packageN
 
     std::ifstream is(packageName, std::ios::binary|std::ios::in);
     if(!is){
-        throw std::runtime_error(targetPath+": can't find file!");
+        throw std::runtime_error("无法打开 "+packageName);
     }
     while((!is.eof()) && zeroBlockNum<2){
         unpack(is, targetPath);
     }
     is.close();
+}
+
+void Archive::qExtract(const QString &targetPath, const QString &packageName)
+{
+    std::string targetPathS = targetPath.toLocal8Bit().constData();
+    std::string packageNameS = packageName.toLocal8Bit().constData();
+    extract(targetPathS, packageNameS);
 }
 
 
@@ -47,7 +54,7 @@ void Archive::package(const std::string &fileName, std::ostream &os) {
         case MODE_REG:{
             std::ifstream is(filePath, std::ios::binary|std::ios::in);
             if(!is){
-                throw std::runtime_error("file not exist!");
+                throw std::runtime_error("无法打开 "+filePath);
             }
             h.write(os);
             packFrom(is, os, h.getSize());
@@ -59,6 +66,9 @@ void Archive::package(const std::string &fileName, std::ostream &os) {
             QString hPath = QString::fromLocal8Bit(filePath.c_str());
             QDir qd(hPath);
             qd.setFilter(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs );
+            if(!qd.exists()){
+                throw std::runtime_error("找不到 "+filePath);
+            }
             for(auto &entry: qd.entryInfoList()){
                 QString ePath = entry.absoluteFilePath();
                 //std::cout<<"absolute entry path is "<<ePath.toLocal8Bit().constData()<<std::endl;
@@ -70,7 +80,7 @@ void Archive::package(const std::string &fileName, std::ostream &os) {
         }
         default:
             std::cerr<<"package: "<<archivePath<<fileName<<" no type! "<<h.getMode()<<std::endl;
-            //throw std::runtime_error("package:"+ fileName + " not expected file type!");
+            throw std::runtime_error(fileName + " 类型不对");
     }
 }
 void Archive::unpack(std::istream &is, const std::string &path){
@@ -91,7 +101,7 @@ void Archive::unpack(std::istream &is, const std::string &path){
         case MODE_REG:{
             std::ofstream os(filePath, std::ios::binary | std::ios::out);
             if(!os){
-                throw std::runtime_error(path + h.getName()+": can't create file!");
+                throw std::runtime_error("无法创建 "+path + h.getName());
             }
             unpackFrom(is, os, h.getSize());
             os.close();
@@ -99,7 +109,9 @@ void Archive::unpack(std::istream &is, const std::string &path){
         }
         case MODE_DIR:{
             QDir cd(QString::fromLocal8Bit(path.c_str()));
-            cd.mkdir(QString::fromLocal8Bit(h.getName().c_str()));
+            if(!cd.mkpath(QString::fromLocal8Bit(h.getName().c_str()))){
+                throw std::runtime_error("无法创建 "+path + h.getName());
+            }
             break;
         }
         case MODE_ZERO:
@@ -107,7 +119,7 @@ void Archive::unpack(std::istream &is, const std::string &path){
             break;
         default:
 
-            throw std::runtime_error("unpack not expected file type!");
+            throw std::runtime_error("无法识别 "+path + h.getName());
     }
 }
 void Archive::packFrom(std::istream &is, std::ostream &os, int fileSize) {

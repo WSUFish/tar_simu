@@ -128,7 +128,7 @@ void Header::setFileInfoQt(const QString &archivePath, const QString &fileName){
     if(!fi.exists()){
 
         std::cout<<Utf8ToGbk(fi.absoluteFilePath().toStdString())+ "not exit!"<<std::endl;
-        throw std::invalid_argument("file not found");
+        throw std::runtime_error("找不到 "+std::string(fi.absoluteFilePath().toLocal8Bit().constData()));
     }
     setName(fileName.toLocal8Bit().constData());
     setMode(fi);
@@ -165,7 +165,7 @@ int Header::getSize(){
 std::string Header::getExtraField(const std::string &key, int size){
     auto iter = extraField.find(key);
     if(iter==extraField.end()){
-        throw std::runtime_error(key+ ": key not found!");
+        throw std::runtime_error(key+ ": 未找到对应字段");
     }else{
         return connectBlock(iter->second, size);
     }

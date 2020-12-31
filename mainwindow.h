@@ -2,6 +2,13 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QLineEdit>
+#include <iostream>
+#include "Archive.h"
+#include "Compress.h"
+#include "Decompress.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -15,7 +22,21 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void on_okPushButton_clicked();
+
+    void on_sourceToolButton_clicked();
+
+    void on_uOkPushButton_clicked();
+
+    void on_uSourceToolButton_clicked();
+
+    void on_uTargetToolButton_clicked();
+
+    void activateUnpack();
+
 private:
     Ui::MainWindow *ui;
+
 };
 #endif // MAINWINDOW_H

@@ -12,12 +12,17 @@ class Archive {
 public:
     std::string archivePath; //archive原路径
     int zeroBlockNum;
+    Archive(){
+        zeroBlockNum = 0;
+        archivePath = "";
+    }
     Archive(const std::string &relativePath){
         zeroBlockNum = 0;
         archivePath = relativePath;
     }
     void create(const std::string &targetPath, std::vector<std::string> &fileNameVector);
     void extract(const std::string &targetPath, const std::string &packageName);
+    void qExtract(const QString &targetPath, const QString &packageName);
 
     void package(const std::string &fileName, std::ostream &os);
     void package(const QString &fileName, std::ostream &os);

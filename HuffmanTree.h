@@ -57,7 +57,7 @@ public:
 };
 //一个函数对象，用于从小到大排序存放指针的pq
 template<typename Type, typename Compare = std::greater<Type> >
-class p_greater : public std::binary_function<Type *, Type *, bool> {
+class p_greater{
 public:
     bool operator()(const Type *x, const Type *y) const
     { return Compare()(*x, *y); }
