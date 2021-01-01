@@ -101,7 +101,7 @@ void Archive::unpack(std::istream &is, const std::string &path){
         case MODE_REG:{
             std::ofstream os(filePath, std::ios::binary | std::ios::out);
             if(!os){
-                throw std::runtime_error("无法创建还原文件 "+path + h.getName());
+                throw std::runtime_error("无法创建还原文件 "+filePath);
             }
             unpackFrom(is, os, h.getSize());
             os.close();
@@ -116,6 +116,7 @@ void Archive::unpack(std::istream &is, const std::string &path){
         }
         case MODE_ZERO:
             zeroBlockNum++;
+            std::cout<<"全零块"<<std::endl;
             break;
         default:
 
@@ -131,15 +132,12 @@ void Archive::packFrom(std::istream &is, std::ostream &os, int fileSize) {
     }
 }
 void Archive::unpackFrom(std::istream &is, std::ostream &os, int fileSize) {
-    while(fileSize > 512){
+    while(fileSize > 0){
         Block b;
         b.read(is);
-        b.write(os);
+        b.write(os, fileSize>512?512:fileSize);
         fileSize -= 512;
     }
-    Block b;
-    b.read(is);
-    b.write(os, fileSize);
 }
 void Archive::package(const QString &fileName, std::ostream &os){
     package(std::string(fileName.toLocal8Bit().constData()), os);

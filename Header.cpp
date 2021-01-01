@@ -265,6 +265,7 @@ void Header::readExtraField(std::istream &is, const std::string &key,char *field
         std::vector<Block> v;
         nameLength = atoi(field);
         while(nameLength > 0){
+            //printf("读了一块额外内容\n");
             Block b;
             b.read(is);
             v.push_back(b);

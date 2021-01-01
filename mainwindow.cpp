@@ -198,7 +198,14 @@ void MainWindow::activatePack()
 
 void MainWindow::on_targetToolButton_clicked()
 {
-    QString curPath = QDir::rootPath();
+    QString curPath;
+    if(packSourceDialog!=nullptr){
+        QDir workPath = packSourceDialog->directory();
+        curPath = workPath.absolutePath()+"/"+workPath.dirName()+ ".tar";
+    }else{
+        curPath = QDir::rootPath();
+        curPath += "/package.tar";
+    }
     QString dlgTitle=QString::fromLocal8Bit("选择备份位置");
     QString filter=QString::fromLocal8Bit("备份文件(*.tar *.hfz)");
     QString filePath= QFileDialog::getSaveFileName(this, dlgTitle, curPath, filter);
