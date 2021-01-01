@@ -20,7 +20,9 @@ SOURCES += \
     Header.cpp \
     HuffmanTree.cpp \
     interface.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    multifiledialog.cpp \
+    multifiledirdialog.cpp
 
 HEADERS += \
     Archive.h \
@@ -30,10 +32,13 @@ HEADERS += \
     Decompress.h \
     Header.h \
     HuffmanTree.h \
-    mainwindow.h
+    mainwindow.h \
+    multifiledialog.h \
+    multifiledirdialog.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    multifiledialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

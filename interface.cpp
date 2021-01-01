@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include <QApplication>
+//#include <QTranslator>
 #include "Compress.h"
 #include "Decompress.h"
 #include "Header.h"
@@ -39,6 +40,11 @@ int main(int argc, char *argv[])
     //testQ("D:/filetest/2/testTar.tar");
     //std::cout<<"stem="<<MainWindow::getStem("D:/filetest/2/testTar.tar.hfz").toStdString()<<std::endl;
     QApplication a(argc, argv);
+
+//    QTranslator user;
+//    user.load("qt_zh_CN.qm", "translation/");
+//    a.installTranslator(&user);
+
     MainWindow w;
     w.show();
     return a.exec();
