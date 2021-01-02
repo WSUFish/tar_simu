@@ -20,13 +20,16 @@ public:
         zeroBlockNum = 0;
         archivePath = relativePath;
     }
-    void create(const std::string &targetPath, std::vector<std::string> &fileNameVector);
-    void extract(const std::string &targetPath, const std::string &packageName);
-    void qExtract(const QString &targetPath, const QString &packageName);
+    void create(const std::string &targetPath, std::vector<std::string> &fileNameVector, const std::string &key = "");
+    void extract(const std::string &targetPath, const std::string &packageName, const std::string &key = "");
+    void qExtract(const QString &targetPath, const QString &packageName, const std::string &key = "");
+    bool isEncrypt(const std::string &packageName);
+    bool checkPassword(const std::string &packageName, const std::string &key);
 
-    void package(const std::string &fileName, std::ostream &os);
-    void package(const QString &fileName, std::ostream &os);
-    void unpack(std::istream &is, const std::string &path);
+
+    void package(const std::string &fileName, std::ostream &os, const std::string &key = "");
+    void package(const QString &fileName, std::ostream &os, const std::string &key = "");
+    void unpack(std::istream &is, const std::string &path, const std::string &key = "");
 
     void writeHeader();
     //void iter_file();
@@ -34,6 +37,8 @@ public:
 private:
     void packFrom(std::istream &is, std::ostream &os, int fileSize);
     void unpackFrom(std::istream &is, std::ostream &os, int fileSize);
+    void packFromEncry(std::istream &is, std::ostream &os, const std::string &key,int fileSize);
+    void unpackFromEncry(std::istream &is, std::ostream &os, const std::string &key, int fileSize);
 };
 
 

@@ -10,7 +10,7 @@
 #include <process.h>
 #include <time.h>
 #include <string>
-#include <exception>
+
 #include <cstdlib>
 #include <vector>
 #include <map>
@@ -33,7 +33,9 @@ class Header: public Block{
     char *uid;//                            2
     char *gid;//                            2
     char *size;//                           8 uintmax_t
-    char *check;
+    char *check;//                          8
+    char *encrypt;//是否加密                 1
+    char *checkEncry;//检测密码是否正确        16
     std::map<std::string, std::vector<Block>> extraField;
     Header() : Block(){
         name = block;
@@ -43,21 +45,27 @@ class Header: public Block{
         gid = uid + 2;
         size = gid + 2;
         check = size + 8;
+        encrypt = check + 8;
+        checkEncry = encrypt +1;
     };
     void setFileInfo(std::string archivePath, std::string fileName);
     void setFileInfoQt(const QString &archivePath, const QString &fileName);
+    void setFileInfoQt(const QString &archivePath, const QString &fileName, const std::string &key);
     //void setFileInfoQt(const QString &archivePath, const QString &fileName);
     void setName(std::string fileName);
     void setMode(unsigned short mode);
     void setMode(const fs::file_status &fss);
     void setMode(const QFileInfo &fi);
 //    int getPerm(); //获取权限信息
+    void setEncry(const char* key);
     void setSize(uintmax_t file_size);
     int getSize();
     std::string getName();
     char getMode(); //判断文件类型
     std::string getExtraField(const std::string &key, int size);
     bool allZero();
+    bool isEncrypt();
+    bool checkPassword(const std::string &key);
     void setExtraField(const std::string &key, const std::string &field);
     static std::string connectBlock(const std::vector<Block> &bv, int size);
     int read(FILE *fileName);
@@ -67,6 +75,7 @@ class Header: public Block{
 
     void read(std::istream &is);
     void write(std::ostream &os);
+
     void readExtraField(std::istream &is, const std::string &key,char *field, char *field_extra);
     void writeExtraField(std::ostream &os, const std::string &key, char *field_extra);
     void printHead();

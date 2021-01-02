@@ -4,44 +4,81 @@
 
 #include "Archive.h"
 
-void Archive::create(const std::string &targetPath, std::vector<std::string> &fileNameVector) {
+void Archive::create(const std::string &targetPath, std::vector<std::string> &fileNameVector, const std::string &key) {
 
     std::ofstream os(targetPath, std::ios::binary|std::ios::out);
     if(!os){
         throw std::runtime_error("无法创建 "+targetPath);
     }
     for(auto iter = fileNameVector.begin();iter!=fileNameVector.end();iter++){
-            package((*iter), os);
+            package((*iter), os, key);
     }
     os.close();
 }
 
-void Archive::extract(const std::string &targetPath, const std::string &packageName) {
+void Archive::extract(const std::string &targetPath, const std::string &packageName, const std::string &key) {
 
     std::ifstream is(packageName, std::ios::binary|std::ios::in);
     if(!is){
         throw std::runtime_error("无法打开备份文件 "+packageName);
     }
     while((!is.eof()) && zeroBlockNum<2){
-        unpack(is, targetPath);
+        unpack(is, targetPath, key);
     }
     is.close();
 }
 
-void Archive::qExtract(const QString &targetPath, const QString &packageName)
+void Archive::qExtract(const QString &targetPath, const QString &packageName, const std::string &key)
 {
     std::string targetPathS = targetPath.toLocal8Bit().constData();
     std::string packageNameS = packageName.toLocal8Bit().constData();
-    extract(targetPathS, packageNameS);
+    extract(targetPathS, packageNameS, key);
+}
+
+bool Archive::isEncrypt(const std::string &packageName)
+{
+    std::ifstream is(packageName);
+    if(!is){
+        throw std::runtime_error("无法打开备份文件 "+packageName);
+    }
+    Header h;
+    h.read(is);
+    is.close();
+    if(h.isEncrypt()){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+bool Archive::checkPassword(const std::string &packageName, const std::string &key)
+{
+    std::ifstream is(packageName);
+    if(!is){
+        throw std::runtime_error("无法打开备份文件 "+packageName);
+    }
+    Header h;
+    h.read(is);
+    is.close();
+    return h.checkPassword(key);
 }
 
 
-
-void Archive::package(const std::string &fileName, std::ostream &os) {
+void Archive::package(const std::string &fileName, std::ostream &os, const std::string &key) {
     Header h;
     QDir currentPath(QString::fromLocal8Bit(archivePath.c_str()));
     QString qFileName = QString::fromLocal8Bit(fileName.c_str());
-    h.setFileInfoQt(currentPath.path(), qFileName);
+    bool isEncry = false;
+    if(key!=""){
+        isEncry = true;
+    }
+
+    if(isEncry){
+        h.setFileInfoQt(currentPath.path(), qFileName, key);
+    }else{
+        h.setFileInfoQt(currentPath.path(), qFileName);
+    }
+
 
     std::string filePath;
     if(archivePath.at(archivePath.length()-1)!='/'){
@@ -57,7 +94,11 @@ void Archive::package(const std::string &fileName, std::ostream &os) {
                 throw std::runtime_error("无法打开原文件 "+filePath);
             }
             h.write(os);
-            packFrom(is, os, h.getSize());
+            if(isEncry){
+                packFromEncry(is, os, key, h.getSize());
+            }else{
+                packFrom(is, os, h.getSize());
+            }
             is.close();
             break;
         }
@@ -74,7 +115,7 @@ void Archive::package(const std::string &fileName, std::ostream &os) {
                 //std::cout<<"absolute entry path is "<<ePath.toLocal8Bit().constData()<<std::endl;
                 QString rPath = currentPath.relativeFilePath(ePath);
                 //std::cout<<"relative entry path is "<<rPath.toLocal8Bit().constData()<<std::endl;
-                package(rPath, os);
+                package(rPath, os, key);
             }
             break;
         }
@@ -83,11 +124,20 @@ void Archive::package(const std::string &fileName, std::ostream &os) {
             throw std::runtime_error(fileName + " 类型不对");
     }
 }
-void Archive::unpack(std::istream &is, const std::string &path){
+
+
+void Archive::unpack(std::istream &is, const std::string &path, const std::string &key){
+
     Header h;
     h.read(is);
     if(is.eof()){
         return;
+    }
+    bool isEncry = h.isEncrypt();
+    if(isEncry){
+        if(!h.checkPassword(key)){
+            throw std::runtime_error("密码错误！");
+        }
     }
     h.printHead();
 
@@ -103,7 +153,11 @@ void Archive::unpack(std::istream &is, const std::string &path){
             if(!os){
                 throw std::runtime_error("无法创建还原文件 "+filePath);
             }
-            unpackFrom(is, os, h.getSize());
+            if(isEncry){
+                unpackFromEncry(is, os, key, h.getSize());
+            }else{
+                unpackFrom(is, os, h.getSize());
+            }
             os.close();
             break;
         }
@@ -139,7 +193,27 @@ void Archive::unpackFrom(std::istream &is, std::ostream &os, int fileSize) {
         fileSize -= 512;
     }
 }
-void Archive::package(const QString &fileName, std::ostream &os){
-    package(std::string(fileName.toLocal8Bit().constData()), os);
+
+void Archive::packFromEncry(std::istream &is, std::ostream &os, const std::string &key, int fileSize)
+{
+    while(fileSize > 0){
+        Block b;
+        b.readEncry(is, key.c_str(), fileSize>508? 508:fileSize);
+        b.write(os);
+        fileSize -= 508;
+    }
+}
+
+void Archive::unpackFromEncry(std::istream &is, std::ostream &os, const std::string &key, int fileSize)
+{
+    while(fileSize > 0){
+        Block b;
+        b.read(is);
+        b.writeEncry(os, key.c_str(),fileSize>508? 508:fileSize );
+        fileSize -= 508;
+    }
+}
+void Archive::package(const QString &fileName, std::ostream &os, const std::string &key){
+    package(std::string(fileName.toLocal8Bit().constData()), os, key);
 }
 

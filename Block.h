@@ -9,6 +9,8 @@
 #include <fstream>
 #include <cstring>
 #include <cstdlib>
+#include "xxtea.h"
+#include <exception>
 
 class Block {
 public:
@@ -19,8 +21,14 @@ public:
     int read(FILE *fileName, int size=512);
     int read(const char *source, int size);
     int write(FILE *fileName, int size=512);
+
     void read(std::istream &is, int size=512);
     void write(std::ostream &os, int size=512);
+
+    void readEncry(std::istream &is, const char* key, int size=508);
+    void writeEncry(std::ostream &os, const char* key, int size=508);
+
+    static int encryLen(int size){return 4*((size-1)/4+2);}
 };
 
 

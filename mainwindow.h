@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QMessageBox>
 #include <QLineEdit>
 #include <iostream>
@@ -27,6 +28,8 @@ public:
     static QString getStem(const QString &filePath);//从绝对路径中取出去一次后缀文件名
     static QString getCommParent(QStringList &allPath);
     static std::string getCommParent(std::vector<std::string> &vs);
+
+    std::string getRightPassword(const std::string &fileName, bool &ok);
 
 private slots:
     void on_okPushButton_clicked();

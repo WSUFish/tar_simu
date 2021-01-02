@@ -22,7 +22,8 @@ SOURCES += \
     interface.cpp \
     mainwindow.cpp \
     multifiledialog.cpp \
-    multifiledirdialog.cpp
+    multifiledirdialog.cpp \
+    xxtea.c
 
 HEADERS += \
     Archive.h \
@@ -34,7 +35,8 @@ HEADERS += \
     HuffmanTree.h \
     mainwindow.h \
     multifiledialog.h \
-    multifiledirdialog.h
+    multifiledirdialog.h \
+    xxtea.h
 
 FORMS += \
     mainwindow.ui \

@@ -142,6 +142,13 @@ void Header::setFileInfoQt(const QString &archivePath, const QString &fileName){
 
 }
 
+void Header::setFileInfoQt(const QString &archivePath, const QString &fileName, const std::string &key)
+{
+    setFileInfoQt(archivePath, fileName);
+    setEncry(key.c_str());
+
+}
+
 void Header::setMode(const QFileInfo &fi){
     if(fi.isDir()){
         *mode = MODE_DIR;
@@ -152,6 +159,19 @@ void Header::setMode(const QFileInfo &fi){
     }else{
         std::cerr<<"error! unknown file type"<<std::endl;
     }
+}
+
+void Header::setEncry(const char *key)
+{
+    *encrypt = 'y';
+    size_t len = 0;
+    unsigned char *encrypt_data = (unsigned char*)xxtea_encrypt(name , 12, key, &len);
+    if(len!=16){
+        throw std::runtime_error("头记录加密长度出错！");
+    }
+    memcpy(checkEncry, encrypt_data, len);
+    free(encrypt_data);
+
 }
 
 void Header::setSize(uintmax_t file_size){
@@ -179,6 +199,30 @@ bool Header::allZero() {
         }
     }
     return true;
+}
+
+bool Header::isEncrypt()
+{
+    return (*encrypt)=='y';
+}
+
+bool Header::checkPassword(const std::string &key)
+{
+    size_t len = 0;
+    char *decrypt_data = (char* )xxtea_decrypt((unsigned char *)checkEncry, 16, key.c_str(), &len);
+    bool result = true;
+    if(len!=12){
+        //throw std::runtime_error("解密长度不对");
+       result = false;
+    }
+    for(int i=0;i<(int)len;i++){
+        if(*(name+i)!=*(decrypt_data+i)){
+            result = false;
+            break;
+        }
+    }
+    free(decrypt_data);
+    return result;
 }
 
 std::string Header::connectBlock(const std::vector<Block> &bv, int size) {

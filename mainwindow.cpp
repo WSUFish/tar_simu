@@ -55,6 +55,40 @@ std::string MainWindow::getCommParent(std::vector<std::string> &vs)
     return prefix;
 }
 
+std::string MainWindow::getRightPassword(const std::string &fileName, bool &ok)
+{
+    Archive a;
+    if(a.isEncrypt(fileName)){
+        QString dlgTitle=GbkToQ("输入密码");
+        QString txtLabel=GbkToQ("请输入密码");
+        QLineEdit::EchoMode echoMode=QLineEdit::Password;//密码输入
+
+        QInputDialog qid(this);
+        qid.setWindowTitle(dlgTitle);
+        qid.setLabelText(txtLabel);
+        qid.setInputMode(QInputDialog::TextInput);
+        qid.setCancelButtonText(GbkToQ("取消"));
+        qid.setOkButtonText(GbkToQ("确定"));
+        qid.setTextEchoMode(echoMode);
+        QString text = "";
+        qid.exec();
+        while(qid.result()==QDialog::Accepted){
+            text = qid.textValue();
+            if(!a.checkPassword(fileName, QToGbk(text))){
+                QMessageBox::critical(this, GbkToQ("错误"), GbkToQ("密码错误！"));
+            }else{
+                ok = true;
+                return QToGbk(text);
+            }
+            qid.exec();
+        }
+        ok = false;
+    }else{
+        ok = true;
+    }
+    return "";
+}
+
 
 
 
@@ -72,7 +106,44 @@ void MainWindow::on_okPushButton_clicked()
 //    std::cout<<"common path is:"<<workpath<<std::endl;
     try {
         targetName += ".tar";
-        a.create(targetName, vs);
+        if(ui->encryptCheckBox->isChecked()){
+            QString dlgTitle=GbkToQ("设置密码");
+            QString txtLabel=GbkToQ("请输入4到18位密码");
+            QLineEdit::EchoMode echoMode=QLineEdit::Password;//密码输入
+
+            QInputDialog qid(this);
+            qid.setWindowTitle(dlgTitle);
+            qid.setLabelText(txtLabel);
+            qid.setInputMode(QInputDialog::TextInput);
+            qid.setCancelButtonText(GbkToQ("取消"));
+            qid.setOkButtonText(GbkToQ("确定"));
+            qid.setTextEchoMode(echoMode);
+            QString text = "";
+            qid.exec();
+            while(qid.result()==QDialog::Accepted){
+                text = qid.textValue();
+                if(text == ""){
+
+                    QMessageBox::critical(this, QString::fromLocal8Bit("错误"),GbkToQ("请输入密码！"));
+
+                }else if(text.length()<4){
+
+                    QMessageBox::critical(this, QString::fromLocal8Bit("错误"),GbkToQ("密码过短！"));
+
+                }else if(text.length()>18){
+                    QMessageBox::critical(this, QString::fromLocal8Bit("错误"),GbkToQ("密码过长！"));
+                }else{
+                    a.create(targetName, vs, QToGbk(text));
+                    break;
+                }
+                qid.exec();
+            }
+            if(qid.result()==QDialog::Rejected){
+                return;
+            }
+        }else{
+            a.create(targetName, vs);
+        }
         if(ui->compressCheckBox->isChecked()){
             Compress c(targetName);
             c.genCompressed(targetName+".hfz");
@@ -134,18 +205,30 @@ void MainWindow::on_uOkPushButton_clicked()
     QString targetPath = ui->uTargetLineEdit->text();
     QString packageName = ui->uSourceLineEdit->text();
     std::string sPackage = QToGbk(packageName);
+    bool ok = false;
     try {
         if(packageName.endsWith(".tar.hfz")){
             Decompress d(sPackage);
             d.decompress(sPackage+".temp");
-            a.extract(QToGbk(targetPath) , sPackage+".temp");
+
+
+            std::string key =getRightPassword(sPackage+".temp", ok);
+            if(!ok){
+                return;
+            }
+
+            a.extract(QToGbk(targetPath) , sPackage+".temp", key);
             QFile::remove(GbkToQ(sPackage+".temp"));
         }else if(packageName.endsWith(".hfz")){
             Decompress d(sPackage);
             d.decompress(QToGbk(targetPath + "/" +getStem(packageName)));
         }
         else{
-            a.qExtract(targetPath, packageName);
+            std::string key =getRightPassword(QToGbk(packageName), ok);
+            if(!ok){
+                return;
+            }
+            a.qExtract(targetPath, packageName, key);
         }
         ui->uSourceLineEdit->clear();
         ui->uTargetLineEdit->clear();
