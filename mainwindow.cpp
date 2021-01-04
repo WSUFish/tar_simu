@@ -97,6 +97,8 @@ void MainWindow::on_okPushButton_clicked()
     QDir workPath = packSourceDialog->directory();
     Archive a(QToGbk(workPath.absolutePath()));
     QStringList allPath = ui->sourceLineEdit->text().split(';');
+    QString inforText = GbkToQ("备份成功");
+    QString password = "";
     std::vector<std::string> vs;
     std::string targetName = QToGbk(ui->targetLineEdit->text());
     for(int i=0;i<allPath.count();i++){
@@ -118,22 +120,22 @@ void MainWindow::on_okPushButton_clicked()
             qid.setCancelButtonText(GbkToQ("取消"));
             qid.setOkButtonText(GbkToQ("确定"));
             qid.setTextEchoMode(echoMode);
-            QString text = "";
+            //QString password = "";
             qid.exec();
             while(qid.result()==QDialog::Accepted){
-                text = qid.textValue();
-                if(text == ""){
+                password = qid.textValue();
+                if(password == ""){
 
                     QMessageBox::critical(this, QString::fromLocal8Bit("错误"),GbkToQ("请输入密码！"));
 
-                }else if(text.length()<4){
+                }else if(password.length()<4){
 
                     QMessageBox::critical(this, QString::fromLocal8Bit("错误"),GbkToQ("密码过短！"));
 
-                }else if(text.length()>18){
+                }else if(password.length()>18){
                     QMessageBox::critical(this, QString::fromLocal8Bit("错误"),GbkToQ("密码过长！"));
                 }else{
-                    a.create(targetName, vs, QToGbk(text));
+                    a.create(targetName, vs, QToGbk(password));
                     break;
                 }
                 qid.exec();
@@ -144,15 +146,24 @@ void MainWindow::on_okPushButton_clicked()
         }else{
             a.create(targetName, vs);
         }
+        if(ui->checkCheckBox->isChecked()){
+            QStringList qsl = a.checkOut(targetName, vs, QToGbk(password));
+            if(qsl.empty()){
+                inforText = GbkToQ("校验完毕，备份成功！");
+            }else{
+                inforText = GbkToQ("校验失败！文件备份失败：")+qsl.join(";");
+            }
+        }
         if(ui->compressCheckBox->isChecked()){
             Compress c(targetName);
             c.genCompressed(targetName+".hfz");
             QFile::remove(GbkToQ(targetName));
         }
 
+
         ui->sourceLineEdit->clear();
         ui->targetLineEdit->clear();
-        QMessageBox::information(this, QString::fromLocal8Bit("提醒"),QString::fromLocal8Bit("备份成功"));
+        QMessageBox::information(this, QString::fromLocal8Bit("提醒"), inforText);
     }  catch (const std::runtime_error &e) {
 
         QString errorText =QString::fromLocal8Bit(e.what());

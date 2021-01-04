@@ -28,6 +28,23 @@ void Archive::extract(const std::string &targetPath, const std::string &packageN
     is.close();
 }
 
+QStringList Archive::checkOut(const std::string &packageName, std::vector<std::string> &fileNameVector, const std::string &key)
+{
+    if(archivePath.at(archivePath.length()-1)!='/'){
+        archivePath.append("/");
+    }
+    std::ifstream is(packageName, std::ios::binary|std::ios::in);
+    QStringList sl;
+    if(!is){
+        throw std::runtime_error("无法打开备份文件 "+packageName);
+    }
+    for(auto iter = fileNameVector.begin();iter!=fileNameVector.end();iter++){
+            sl += compare(archivePath+(*iter), is, key);
+    }
+    is.close();
+    return sl;
+}
+
 void Archive::qExtract(const QString &targetPath, const QString &packageName, const std::string &key)
 {
     std::string targetPathS = targetPath.toLocal8Bit().constData();
@@ -177,6 +194,73 @@ void Archive::unpack(std::istream &is, const std::string &path, const std::strin
             throw std::runtime_error("无法识别 "+path + h.getName());
     }
 }
+
+QStringList Archive::compare(const std::string &fileName, std::istream &pis, const std::string &key)
+{
+    QDir currentPath(GbkToQ(archivePath));
+    QStringList sl;
+    Header h;
+    h.read(pis);
+    if(pis.eof()){
+        return sl;
+    }
+    bool isEncry = h.isEncrypt();
+    if(isEncry){
+        if(!h.checkPassword(key)){
+            throw std::runtime_error("密码错误！");
+        }
+    }
+    h.printHead();
+
+
+    switch(h.getMode()){
+        case MODE_REG:{
+            std::ifstream sis(fileName, std::ios::binary | std::ios::in);
+            if(!sis){
+                throw std::runtime_error("校验时找不到原文件 "+fileName);
+            }
+            if(isEncry){
+                if(!compareFormEncry(sis, pis, key, h.getSize())){
+                    sl.append(GbkToQ(fileName));
+                }
+                //unpackFromEncry(sis, os, key, h.getSize());
+            }else{
+                if(!compareForm(sis, pis, h.getSize())){
+                    sl.append(GbkToQ(fileName));
+                }
+                //unpackFrom(is, os, h.getSize());
+            }
+            sis.close();
+            break;
+        }
+        case MODE_DIR:{
+            QString hPath = GbkToQ(fileName);
+            QDir qd(hPath);
+            qd.setFilter(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs );
+            if(!qd.exists()){
+                sl.append(hPath);
+                break;
+            }
+            for(auto &entry: qd.entryInfoList()){
+                QString ePath = entry.absoluteFilePath();
+            //std::cout<<"absolute entry path is "<<ePath.toLocal8Bit().constData()<<std::endl;
+                //QString rPath = currentPath.relativeFilePath(ePath);
+            //std::cout<<"relative entry path is "<<rPath.toLocal8Bit().constData()<<std::endl;
+                QStringList slTmp =compare(QToGbk(ePath), pis, key);
+                sl+=slTmp;
+            }
+            break;
+        }
+        case MODE_ZERO:
+            zeroBlockNum++;
+            std::cout<<"全零块"<<std::endl;
+            break;
+        default:
+
+            throw std::runtime_error("无法识别 "+fileName);
+    }
+    return sl;
+}
 void Archive::packFrom(std::istream &is, std::ostream &os, int fileSize) {
     while(fileSize > 0){
         Block b;
@@ -192,6 +276,21 @@ void Archive::unpackFrom(std::istream &is, std::ostream &os, int fileSize) {
         b.write(os, fileSize>512?512:fileSize);
         fileSize -= 512;
     }
+}
+
+bool Archive::compareForm(std::istream &sis, std::istream &pis, int fileSize)
+{
+    bool result = true;
+    while(fileSize > 0){
+        Block bs, bp;
+        bs.read(sis);
+        bp.read(pis);
+        if(result && memcmp(bs.block, bp.block, fileSize>512?512:fileSize)!=0){
+            result = false;
+        }
+        fileSize -= 512;
+    }
+    return result;
 }
 
 void Archive::packFromEncry(std::istream &is, std::ostream &os, const std::string &key, int fileSize)
@@ -212,6 +311,21 @@ void Archive::unpackFromEncry(std::istream &is, std::ostream &os, const std::str
         b.writeEncry(os, key.c_str(),fileSize>508? 508:fileSize );
         fileSize -= 508;
     }
+}
+
+bool Archive::compareFormEncry(std::istream &sis, std::istream &pis, const std::string &key, int fileSize)
+{
+    bool result = true;
+    while(fileSize > 0){
+        Block bs, bp;
+        bs.readEncry(sis, key.c_str(), fileSize>508? 508:fileSize);
+        bp.read(pis);
+        if(result && memcmp(bs.block, bp.block, fileSize>512?512:fileSize)!=0){
+            result = false;
+        }
+        fileSize -= 508;
+    }
+    return result;
 }
 void Archive::package(const QString &fileName, std::ostream &os, const std::string &key){
     package(std::string(fileName.toLocal8Bit().constData()), os, key);

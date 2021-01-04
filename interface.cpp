@@ -16,11 +16,21 @@ void testCompress(){
 void testArchive(){
     Archive ar("D:/filetest/1/");
     std::vector<std::string> v;
-    v.emplace_back("testQtMainWindow");
     v.emplace_back("router.txt");
+    v.emplace_back("testQtMainWindow");
+
     v.emplace_back("2021年全国硕士研究生招生考试数学一试题及答案.pdf");
-    ar.create("D:/filetest/2/testTar.tar",v, "1234");
-    ar.extract("D:/filetest/2","D:/filetest/2/testTar.tar", "12345");
+    ar.create("D:/filetest/2/testTar.tar",v);
+    QStringList sl = ar.checkOut("D:/filetest/2/testTar.tar", v, "1234");
+    if(sl.empty()){
+        std::cout<<"all right!"<<std::endl;
+    }else{
+        for(auto &s: sl){
+            std::cout<<QToGbk(s)<<std::endl;
+        }
+        std::cout<<"wrong!"<<std::endl;
+    }
+    //ar.extract("D:/filetest/2","D:/filetest/2/testTar.tar", "12345");
 }
 void testDecompress(){
     Archive a;
